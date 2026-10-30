@@ -39,7 +39,9 @@ docs/                       ER diyagramı, mimari ve haftalık notlar
 
 - [ER diyagramı](docs/er-diyagrami.md)
 - [Mimari](docs/mimari.md)
+- [Hafta 4: Veritabanı](docs/hafta-4-veritabani.md)
 
 ## Haftalık ilerleme
 
 - [x] Hafta 3: Kurulum, mimari ve veri modeli
+- [x] Hafta 4: Veritabanı ve veri erişim katmanı
