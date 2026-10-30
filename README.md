@@ -52,9 +52,11 @@ docs/                       ER diyagramı, mimari ve haftalık notlar
 - [Mimari](docs/mimari.md)
 - [Hafta 4: Veritabanı](docs/hafta-4-veritabani.md)
 - [Hafta 5: Güvenlik notu](docs/hafta-5-guvenlik-notu.md)
+- [Hafta 6: Profil ve tercih anketi](docs/hafta-6-profil-anket.md)
 
 ## Haftalık ilerleme
 
 - [x] Hafta 3: Kurulum, mimari ve veri modeli
 - [x] Hafta 4: Veritabanı ve veri erişim katmanı
 - [x] Hafta 5: Kullanıcı yönetimi ve kimlik doğrulama
+- [x] Hafta 6: Profil ve tercih anketi

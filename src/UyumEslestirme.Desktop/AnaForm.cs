@@ -26,10 +26,17 @@ public sealed class AnaForm : Form
         });
 
         var sekmeler = new TabControl { Dock = DockStyle.Fill };
-        sekmeler.TabPages.Add(new TabPage("Ana sayfa")
+        var profil = new ProfilSekmesi(servisler.Profil, servisler.Anket);
+        var profilSayfasi = new TabPage("Profil") { Controls = { profil } };
+        sekmeler.TabPages.Add(profilSayfasi);
+        sekmeler.TabPages.Add(new TabPage("Tercih anketi") { Controls = { new AnketSekmesi(servisler.Anket) } });
+
+        // Anket kaydedildikten sonra profil sekmesindeki ozet guncel gorunsun.
+        sekmeler.Selected += (_, e) =>
         {
-            Controls = { new Label { Text = $"Hoş geldiniz, {servisler.Oturum.AdSoyad}.", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter } },
-        });
+            if (e.TabPage == profilSayfasi)
+                profil.Yenile();
+        };
 
         // Arayuzde gizlemek yalnizca kolayliktir; asil yetki kontrolu YonetimServisi icindedir.
         if (servisler.Oturum.Rol == Rol.Yonetici)

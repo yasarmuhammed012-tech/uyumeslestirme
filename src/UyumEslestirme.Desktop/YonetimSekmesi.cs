@@ -17,6 +17,9 @@ public sealed class YonetimSekmesi : UserControl
         };
         Controls.Add(tablo);
 
-        Arayuz.Dene(() => tablo.DataSource = yonetim.KullanicilariListele());
+        // Tarihler veritabaninda UTC tutulur, ekranda yerel saat gosterilir.
+        Arayuz.Dene(() => tablo.DataSource = yonetim.KullanicilariListele()
+            .Select(k => k with { OlusturmaTarihi = DateTime.SpecifyKind(k.OlusturmaTarihi, DateTimeKind.Utc).ToLocalTime() })
+            .ToList());
     }
 }
