@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/UyumEslestirme.Business/UyumEslestirme.Business.csproj" />
+    <Project Path="src/UyumEslestirme.Data/UyumEslestirme.Data.csproj" />
+    <Project Path="src/UyumEslestirme.Desktop/UyumEslestirme.Desktop.csproj" />
+    <Project Path="src/UyumEslestirme.Domain/UyumEslestirme.Domain.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/UyumEslestirme.Tests/UyumEslestirme.Tests.csproj" />
+  </Folder>
+</Solution>

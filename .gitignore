@@ -1,0 +1,35 @@
+# Derleme ciktilari
+bin/
+obj/
+out/
+publish/
+
+# IDE / kullaniciya ozel dosyalar
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+
+# Yerel veritabani: calisma aninda olusur, depoya girmez
+*.db
+*.db-shm
+*.db-wal
+
+# Gizli / ortama ozel ayarlar
+.env
+.env.*
+appsettings.*.local.json
+secrets.json
+*.pfx
+*.key
+
+# Test ve kapsam raporlari
+TestResults/
+coverage*/
+*.trx
+
+# Isletim sistemi
+Thumbs.db
+.DS_Store
