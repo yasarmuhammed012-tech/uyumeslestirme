@@ -22,6 +22,17 @@ Gereksinim: Windows ve .NET 10 SDK.
 dotnet run --project src/UyumEslestirme.Desktop
 ```
 
+İlk açılışta veritabanı otomatik oluşur. Debug derlemesinde sentetik demo hesaplar da eklenir, parolaları `Demo1234`:
+
+- Yönetici: `yonetici@ornek.test`
+- Öğrenci: `ogrenci01@ornek.test` ... `ogrenci20@ornek.test`
+
+Testler:
+
+```powershell
+dotnet test
+```
+
 ## Proje yapısı
 
 ```text
@@ -40,8 +51,10 @@ docs/                       ER diyagramı, mimari ve haftalık notlar
 - [ER diyagramı](docs/er-diyagrami.md)
 - [Mimari](docs/mimari.md)
 - [Hafta 4: Veritabanı](docs/hafta-4-veritabani.md)
+- [Hafta 5: Güvenlik notu](docs/hafta-5-guvenlik-notu.md)
 
 ## Haftalık ilerleme
 
 - [x] Hafta 3: Kurulum, mimari ve veri modeli
 - [x] Hafta 4: Veritabanı ve veri erişim katmanı
+- [x] Hafta 5: Kullanıcı yönetimi ve kimlik doğrulama
