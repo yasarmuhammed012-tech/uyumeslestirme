@@ -1,4 +1,5 @@
 using UyumEslestirme.Business;
+using UyumEslestirme.Domain;
 
 namespace UyumEslestirme.Desktop;
 
@@ -23,25 +24,15 @@ internal static class Arayuz
         return false;
     }
 
-    public static TableLayoutPanel FormDuzeni(int satirSayisi)
+    public static string KategoriAdi(SoruKategorisi kategori) => kategori switch
     {
-        var duzen = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 2,
-            RowCount = satirSayisi,
-            Padding = new Padding(12),
-        };
-        duzen.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130));
-        duzen.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        return duzen;
-    }
+        SoruKategorisi.UykuDuzeni => "Gece düzeni",
+        SoruKategorisi.Temizlik => "Düzen ve temizlik",
+        SoruKategorisi.Sosyallik => "Sosyallik",
+        SoruKategorisi.Gurultu => "Sessizlik isteği",
+        SoruKategorisi.Ders => "Evde ders çalışma",
+        _ => kategori.ToString(),
+    };
 
-    public static T AlanEkle<T>(TableLayoutPanel duzen, string etiket, T alan) where T : Control
-    {
-        duzen.Controls.Add(new Label { Text = etiket, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(3, 8, 3, 3) });
-        alan.Dock = DockStyle.Fill;
-        duzen.Controls.Add(alan);
-        return alan;
-    }
+    public static string RolAdi(Rol rol) => rol == Rol.Yonetici ? "Yönetici" : "Öğrenci";
 }

@@ -7,21 +7,34 @@ public sealed class KayitForm : Form
     public KayitForm(KimlikServisi kimlik)
     {
         Text = "Kayıt ol";
-        ClientSize = new Size(440, 260);
+        Font = Tema.Govde;
+        BackColor = Color.White;
+        ClientSize = new Size(460, 500);
         StartPosition = FormStartPosition.CenterParent;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
+        MinimizeBox = false;
 
-        var duzen = Arayuz.FormDuzeni(5);
-        var ad = Arayuz.AlanEkle(duzen, "Ad soyad", new TextBox());
-        var eposta = Arayuz.AlanEkle(duzen, "E-posta", new TextBox());
-        var parola = Arayuz.AlanEkle(duzen, "Parola", new TextBox { UseSystemPasswordChar = true });
-        var tekrar = Arayuz.AlanEkle(duzen, "Parola (tekrar)", new TextBox { UseSystemPasswordChar = true });
+        var form = Tema.Yigin();
+        form.Controls.Add(Tema.Etiket("Hesap oluşturun", Tema.Baslik, Tema.Metin));
+        var ad = Tema.Alan(form, "Ad soyad", new TextBox());
+        var eposta = Tema.Alan(form, "E-posta", new TextBox());
+        var parola = Tema.Alan(form, "Parola", new TextBox { UseSystemPasswordChar = true });
+        var tekrar = Tema.Alan(form, "Parola (tekrar)", new TextBox { UseSystemPasswordChar = true });
+        var ipucu = Tema.Etiket(
+            $"En az {KimlikServisi.AsgariParolaUzunlugu} karakter; harf ve rakam içermelidir.",
+            Tema.Kucuk, Tema.SolukMetin);
+        ipucu.Margin = new Padding(0, 0, 0, 16);
+        form.Controls.Add(ipucu);
 
-        var kaydet = new Button { Text = "Kaydol", AutoSize = true };
-        duzen.Controls.Add(new Label());
-        duzen.Controls.Add(kaydet);
-        Controls.Add(duzen);
+        var kaydet = Tema.BirincilDugme("Kayıt ol");
+        kaydet.Dock = DockStyle.Fill;
+        kaydet.Margin = new Padding(0);
+        form.Controls.Add(kaydet);
+
+        var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(36, 28, 36, 20) };
+        panel.Controls.Add(form);
+        Controls.Add(panel);
         AcceptButton = kaydet;
 
         kaydet.Click += (_, _) =>

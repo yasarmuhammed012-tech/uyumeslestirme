@@ -53,6 +53,7 @@ docs/                       ER diyagramı, mimari ve haftalık notlar
 - [Hafta 4: Veritabanı](docs/hafta-4-veritabani.md)
 - [Hafta 5: Güvenlik notu](docs/hafta-5-guvenlik-notu.md)
 - [Hafta 6: Profil ve tercih anketi](docs/hafta-6-profil-anket.md)
+- [Arkadaş bul ve uyum skoru](docs/uyum-skoru.md)
 
 ## Haftalık ilerleme
 

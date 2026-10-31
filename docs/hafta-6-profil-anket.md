@@ -17,6 +17,8 @@ Her soru için iki değer girilir, ikisi de 1-5 aralığındadır:
 
 ## Tercih özeti
 
+Bir kategorideki sorular aynı yönde sorulur. Örneğin "geç yatarım" ile "erken kalkarım" aynı kategoride olsaydı birbirini götürür, ortalama anlamsız olurdu. Bu yüzden iki soru `SoruYonuDuzeltme` migration'ı ile yeniden yazıldı.
+
 Her kategori için iki değer hesaplanır:
 
 ```text
@@ -42,4 +44,4 @@ Ortalama      = Σ(Deger × Agirlik) / Σ(Agirlik)
 
 - **Kimlik doğrulama (Hafta 5):** Tüm işlemler `OturumYoneticisi` üzerinden açık oturum ister.
 - **Veri katmanı (Hafta 4):** Servisler `AnketDeposu` ve `Depo<Profil>` kullanır. Cevaplar transaction içinde değiştirilir, hata olursa eski cevaplar korunur.
-- **Uyum skorlama (sonraki haftalar):** `Deger` ve `Agirlik` verileri skor hesabının girdisi olacak.
+- **Uyum skorlama:** `Deger` ve `Agirlik` verileri [uyum skorunun](uyum-skoru.md) girdisidir.

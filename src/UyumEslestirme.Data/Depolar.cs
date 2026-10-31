@@ -38,6 +38,13 @@ public class KullaniciDeposu(UygulamaDbContext db) : Depo<Kullanici>(db)
 
     public bool EpostaVarMi(string eposta) =>
         Db.Kullanicilar.Any(k => k.Eposta == eposta);
+
+    public List<Kullanici> ProfilliOgrenciler(int haricKullaniciId) =>
+        Db.Kullanicilar.AsNoTracking()
+            .Include(k => k.Profil)
+            .Include(k => k.Cevaplar)
+            .Where(k => k.Rol == Rol.Ogrenci && k.Id != haricKullaniciId && k.Profil != null)
+            .ToList();
 }
 
 public class IlanDeposu(UygulamaDbContext db) : Depo<Ilan>(db)
