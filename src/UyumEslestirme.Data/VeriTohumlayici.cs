@@ -10,13 +10,13 @@ public static class VeriTohumlayici
     private static readonly (SoruKategorisi Kategori, string Metin)[] Sorular =
     [
         (SoruKategorisi.UykuDuzeni, "Geç saatlere kadar uyanık kalırım."),
-        (SoruKategorisi.UykuDuzeni, "Sabahları erken kalkarım."),
+        (SoruKategorisi.UykuDuzeni, "Sabahları geç kalkarım."),
         (SoruKategorisi.Temizlik, "Ortak alanların her zaman düzenli olmasını isterim."),
         (SoruKategorisi.Temizlik, "Temizlik işlerini düzenli olarak paylaşmak isterim."),
         (SoruKategorisi.Sosyallik, "Eve sık sık misafir gelmesinden rahatsız olmam."),
         (SoruKategorisi.Sosyallik, "Ev arkadaşımla birlikte vakit geçirmeyi severim."),
         (SoruKategorisi.Gurultu, "Çalışırken veya dinlenirken sessizlik isterim."),
-        (SoruKategorisi.Gurultu, "Evde yüksek sesle müzik dinlemekten hoşlanırım."),
+        (SoruKategorisi.Gurultu, "Evde sessiz bir ortam tercih ederim."),
         (SoruKategorisi.Ders, "Ders çalışmak için evi sık kullanırım."),
         (SoruKategorisi.Ders, "Sınav dönemlerinde evde yoğun çalışırım."),
     ];
