@@ -88,6 +88,10 @@ public static class VeriTohumlayici
         }
         db.Kullanicilar.AddRange(ogrenciler);
 
+        // Ornek eslestirme durumlari: 02 -> 01 bekleyen istek, 03 ile 01 eslesmis.
+        db.Eslesmeler.Add(new Eslesme { Gonderen = ogrenciler[1], Alici = ogrenciler[0], Durum = EslesmeDurumu.Beklemede, OlusturmaTarihi = simdi });
+        db.Eslesmeler.Add(new Eslesme { Gonderen = ogrenciler[2], Alici = ogrenciler[0], Durum = EslesmeDurumu.Kabul, OlusturmaTarihi = simdi });
+
         for (var i = 0; i < 5; i++)
         {
             db.Ilanlar.Add(new Ilan

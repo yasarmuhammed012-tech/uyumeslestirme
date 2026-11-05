@@ -24,6 +24,9 @@ public class Profil
     public string Sehir { get; set; } = "";
     public string? Hakkinda { get; set; }
 
+    // false ise profil "Arkadas bul" listesinde gorunmez ve yeni istek alamaz.
+    public bool Gorunur { get; set; } = true;
+
     public Kullanici? Kullanici { get; set; }
 }
 

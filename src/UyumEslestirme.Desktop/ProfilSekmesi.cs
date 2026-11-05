@@ -10,6 +10,13 @@ public sealed class ProfilSekmesi : UserControl
     private readonly TextBox _sehir = new();
     private readonly NumericUpDown _dogumYili = new() { Minimum = 1900, Maximum = 2100, Value = 2005 };
     private readonly TextBox _hakkinda = new() { Multiline = true, Height = 90, ScrollBars = ScrollBars.Vertical };
+    private readonly CheckBox _gorunur = new()
+    {
+        Text = "Profilim Arkadaş bul listesinde görünsün",
+        Checked = true,
+        AutoSize = true,
+        Margin = new Padding(0, 10, 0, 0),
+    };
     private readonly Label _kayitDurumu = Tema.Etiket("", Tema.Kucuk, Tema.Basari);
     private readonly Label _anketDurumu = Tema.Etiket("", Tema.KucukKalin, Tema.Basari);
     private readonly TableLayoutPanel _ozet = Tema.Yigin();
@@ -39,6 +46,8 @@ public sealed class ProfilSekmesi : UserControl
         Tema.Alan(form, "Şehir", _sehir);
         Tema.Alan(form, "Doğum yılı", _dogumYili);
         Tema.Alan(form, "Hakkında (isteğe bağlı)", _hakkinda);
+        form.Controls.Add(_gorunur);
+        form.Controls.Add(Tema.Etiket("Kapatırsanız kimse sizi listede göremez ve size yeni istek gönderemez.", Tema.Kucuk, Tema.SolukMetin, 380));
 
         var kaydet = Tema.BirincilDugme("Profili kaydet");
         kaydet.Margin = new Padding(0, 12, 0, 8);
@@ -74,6 +83,7 @@ public sealed class ProfilSekmesi : UserControl
             _sehir.Text = profil.Sehir;
             _dogumYili.Value = Math.Clamp(profil.DogumYili, (int)_dogumYili.Minimum, (int)_dogumYili.Maximum);
             _hakkinda.Text = profil.Hakkinda;
+            _gorunur.Checked = profil.Gorunur;
         }
 
         var tamam = _anket.TamamlandiMi();
@@ -106,7 +116,7 @@ public sealed class ProfilSekmesi : UserControl
 
     private void Kaydet()
     {
-        var girdi = new ProfilGirdisi(_bolum.Text, _sehir.Text, (int)_dogumYili.Value, _hakkinda.Text);
+        var girdi = new ProfilGirdisi(_bolum.Text, _sehir.Text, (int)_dogumYili.Value, _hakkinda.Text, _gorunur.Checked);
         var basarili = Arayuz.Dene(() => _profil.Kaydet(girdi));
         _kayitDurumu.Text = basarili ? "✓ Profil kaydedildi." : "";
     }

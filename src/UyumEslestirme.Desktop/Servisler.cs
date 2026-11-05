@@ -13,16 +13,21 @@ public sealed class Servisler
     public AnketServisi Anket { get; }
     public ProfilServisi Profil { get; }
     public AdayServisi Adaylar { get; }
+    public EslesmeServisi Eslesme { get; }
 
     public Servisler(UygulamaDbContext db, TimeProvider saat)
     {
         var kullanicilar = new KullaniciDeposu(db);
+        var anket = new AnketDeposu(db);
+        var eslesmeler = new EslesmeDeposu(db);
+        var uyum = new UyumServisi(anket, new UyumSkoruDeposu(db), saat);
+
         Oturum = new OturumYoneticisi(saat);
         Kimlik = new KimlikServisi(kullanicilar, Oturum, saat);
         Yonetim = new YonetimServisi(kullanicilar, Oturum);
-        var anket = new AnketDeposu(db);
         Anket = new AnketServisi(anket, Oturum);
-        Adaylar = new AdayServisi(kullanicilar, anket, Oturum, saat);
         Profil = new ProfilServisi(new Depo<Profil>(db), Oturum, saat);
+        Adaylar = new AdayServisi(kullanicilar, eslesmeler, uyum, Oturum, saat);
+        Eslesme = new EslesmeServisi(eslesmeler, kullanicilar, uyum, Oturum, saat);
     }
 }

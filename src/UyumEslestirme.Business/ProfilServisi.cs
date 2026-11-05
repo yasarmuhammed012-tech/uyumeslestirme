@@ -3,7 +3,7 @@ using UyumEslestirme.Domain;
 
 namespace UyumEslestirme.Business;
 
-public sealed record ProfilGirdisi(string Bolum, string Sehir, int DogumYili, string? Hakkinda);
+public sealed record ProfilGirdisi(string Bolum, string Sehir, int DogumYili, string? Hakkinda, bool Gorunur = true);
 
 public sealed class ProfilServisi(Depo<Profil> profiller, OturumYoneticisi oturum, TimeProvider saat)
 {
@@ -53,6 +53,7 @@ public sealed class ProfilServisi(Depo<Profil> profiller, OturumYoneticisi oturu
                 Sehir = sehir,
                 DogumYili = girdi.DogumYili,
                 Hakkinda = hakkinda,
+                Gorunur = girdi.Gorunur,
             });
             return;
         }
@@ -61,6 +62,7 @@ public sealed class ProfilServisi(Depo<Profil> profiller, OturumYoneticisi oturu
         profil.Sehir = sehir;
         profil.DogumYili = girdi.DogumYili;
         profil.Hakkinda = hakkinda;
+        profil.Gorunur = girdi.Gorunur;
         profiller.Guncelle(profil);
     }
 }

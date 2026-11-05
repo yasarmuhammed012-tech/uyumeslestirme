@@ -8,21 +8,17 @@ public sealed class AdaylarSekmesi : UserControl
 
     private readonly AdayServisi _adaylar;
     private readonly AnketServisi _anket;
+    private readonly EslesmeServisi _eslesme;
     private readonly ComboBox _sehir = new() { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Left, Width = 220 };
     private readonly Label _bilgi = Tema.Etiket("", Tema.Govde, Tema.SolukMetin);
-    private readonly FlowLayoutPanel _liste = new()
-    {
-        Dock = DockStyle.Fill,
-        FlowDirection = FlowDirection.TopDown,
-        WrapContents = false,
-        AutoScroll = true,
-    };
+    private readonly FlowLayoutPanel _liste = Arayuz.KartListesi();
     private List<AdayOzeti> _tumu = [];
 
-    public AdaylarSekmesi(AdayServisi adaylar, AnketServisi anket)
+    public AdaylarSekmesi(AdayServisi adaylar, AnketServisi anket, EslesmeServisi eslesme)
     {
         _adaylar = adaylar;
         _anket = anket;
+        _eslesme = eslesme;
 
         _bilgi.Dock = DockStyle.Right;
         _bilgi.Padding = new Padding(0, 6, 0, 0);
@@ -35,7 +31,7 @@ public sealed class AdaylarSekmesi : UserControl
         Controls.Add(Tema.SayfaBasligi("Arkadaş bul", "Diğer öğrencilerin profilleri, size uyumlarına göre sıralanır."));
 
         _sehir.SelectedIndexChanged += (_, _) => Listele();
-        _liste.Resize += (_, _) => KartlariGenislet();
+        _liste.Resize += (_, _) => Arayuz.KartlariGenislet(_liste);
     }
 
     public void Yenile() => Arayuz.Dene(() =>
@@ -52,7 +48,6 @@ public sealed class AdaylarSekmesi : UserControl
         foreach (var sehir in sehirler)
             _sehir.Items.Add(sehir);
         _sehir.Enabled = tamam;
-        // SelectedItem degisince Listele calisir; ayni kalsa da liste yenilensin diye asagida da cagrilir.
         _sehir.SelectedItem = secili is not null && sehirler.Contains(secili) ? secili : TumSehirler;
 
         if (tamam)
@@ -66,7 +61,7 @@ public sealed class AdaylarSekmesi : UserControl
         var sehir = _sehir.SelectedItem as string;
         var sonuc = _tumu.Where(a => sehir is null or TumSehirler || a.Sehir == sehir).ToList();
 
-        Temizle();
+        Arayuz.ListeyiTemizle(_liste);
         _bilgi.Text = $"{sonuc.Count} kişi";
         if (sonuc.Count == 0)
         {
@@ -75,63 +70,48 @@ public sealed class AdaylarSekmesi : UserControl
         }
         foreach (var aday in sonuc)
             _liste.Controls.Add(AdayKarti(aday));
-        KartlariGenislet();
+        Arayuz.KartlariGenislet(_liste);
+    }
+
+    private KartPanel AdayKarti(AdayOzeti aday)
+    {
+        var satirlar = new List<string> { $"{aday.Bolum}  ·  {aday.Sehir}  ·  {aday.Yas} yaş" };
+        if (aday.Hakkinda is not null)
+            satirlar.Add(aday.Hakkinda);
+        satirlar.Add($"En uyumlu: {Arayuz.KategoriAdi(aday.EnUyumluKategori)}   |   En farklı: {Arayuz.KategoriAdi(aday.EnFarkliKategori)}");
+
+        return Arayuz.KisiKarti(aday.AdSoyad, satirlar, aday.UyumYuzdesi, Eylem(aday));
+    }
+
+    private Control Eylem(AdayOzeti aday)
+    {
+        switch (aday.Durum)
+        {
+            case AdayDurumu.Yok:
+                var gonder = Tema.BirincilDugme("İstek gönder");
+                gonder.AccessibleName = $"İstek gönder: {aday.AdSoyad}";
+                // Liste, tiklanan dugmenin kendi olayi bittikten sonra yeniden kurulur.
+                gonder.Click += (_, _) =>
+                {
+                    if (Arayuz.Dene(() => _eslesme.IstekGonder(aday.KullaniciId)))
+                        BeginInvoke(Yenile);
+                };
+                return gonder;
+            case AdayDurumu.IstekGonderildi:
+                return Arayuz.DurumEtiketi("İstek gönderildi, yanıt bekleniyor", Tema.SolukMetin);
+            case AdayDurumu.IstekGeldi:
+                return Arayuz.DurumEtiketi("Size istek gönderdi: Eşleşmelerim'den yanıtlayın", Tema.Uyari);
+            default:
+                return Arayuz.DurumEtiketi("✓ Eşleştiniz", Tema.Basari);
+        }
     }
 
     private void Mesaj(string metin)
     {
-        Temizle();
+        Arayuz.ListeyiTemizle(_liste);
         _bilgi.Text = "";
         var etiket = Tema.Etiket(metin, Tema.Govde, Tema.SolukMetin);
         etiket.Margin = new Padding(0, 16, 0, 0);
         _liste.Controls.Add(etiket);
-    }
-
-    private void Temizle()
-    {
-        while (_liste.Controls.Count > 0)
-            _liste.Controls[0].Dispose();
-    }
-
-    private static KartPanel AdayKarti(AdayOzeti aday)
-    {
-        var bilgiler = Tema.Yigin();
-        bilgiler.Controls.Add(Tema.Etiket(aday.AdSoyad, Tema.AltBaslik, Tema.Metin));
-        bilgiler.Controls.Add(Tema.Etiket($"{aday.Bolum}  ·  {aday.Sehir}  ·  {aday.Yas} yaş", Tema.Kucuk, Tema.SolukMetin));
-        if (aday.Hakkinda is not null)
-            bilgiler.Controls.Add(Tema.Etiket(aday.Hakkinda, Tema.Kucuk, Tema.Metin, 520));
-        bilgiler.Controls.Add(Tema.Etiket(
-            $"En uyumlu: {Arayuz.KategoriAdi(aday.EnUyumluKategori)}   |   En farklı: {Arayuz.KategoriAdi(aday.EnFarkliKategori)}",
-            Tema.Kucuk, Tema.SolukMetin));
-
-        var uyum = Tema.Yigin();
-        var yuzde = Tema.Etiket($"%{aday.UyumYuzdesi:0} uyum", Tema.AltBaslik, Tema.Birincil);
-        uyum.Controls.Add(yuzde);
-        uyum.Controls.Add(new Cubuk(aday.UyumYuzdesi / 100) { Dock = DockStyle.Fill, Margin = new Padding(0) });
-
-        var tablo = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
-        tablo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        tablo.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
-        tablo.Controls.Add(bilgiler);
-        tablo.Controls.Add(uyum);
-
-        var kart = new KartPanel
-        {
-            Height = aday.Hakkinda is null ? 120 : 160,
-            Margin = new Padding(0, 0, 0, 10),
-            Padding = new Padding(18, 14, 18, 10),
-        };
-        kart.Controls.Add(tablo);
-        return kart;
-    }
-
-    private void KartlariGenislet()
-    {
-        var genislik = _liste.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 4;
-        foreach (Control kart in _liste.Controls)
-        {
-            if (kart is KartPanel)
-                kart.Width = Math.Max(genislik, 500);
-        }
     }
 }

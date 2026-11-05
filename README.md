@@ -53,7 +53,8 @@ docs/                       ER diyagramı, mimari ve haftalık notlar
 - [Hafta 4: Veritabanı](docs/hafta-4-veritabani.md)
 - [Hafta 5: Güvenlik notu](docs/hafta-5-guvenlik-notu.md)
 - [Hafta 6: Profil ve tercih anketi](docs/hafta-6-profil-anket.md)
-- [Arkadaş bul ve uyum skoru](docs/uyum-skoru.md)
+- [Hafta 7: Uyum skorlama ve eşleştirme](docs/hafta-7-uyum-eslestirme.md)
+- [Uyum skoru hesabı](docs/uyum-skoru.md)
 
 ## Haftalık ilerleme
 
@@ -61,3 +62,4 @@ docs/                       ER diyagramı, mimari ve haftalık notlar
 - [x] Hafta 4: Veritabanı ve veri erişim katmanı
 - [x] Hafta 5: Kullanıcı yönetimi ve kimlik doğrulama
 - [x] Hafta 6: Profil ve tercih anketi
+- [x] Hafta 7: Uyum skorlama ve eşleştirme

@@ -30,6 +30,7 @@ erDiagram
         int DogumYili
         string Sehir
         string Hakkinda
+        bool Gorunur
     }
     ANKET_SORUSU {
         int Id PK

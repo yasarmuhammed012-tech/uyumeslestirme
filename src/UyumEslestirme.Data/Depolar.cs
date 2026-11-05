@@ -39,12 +39,53 @@ public class KullaniciDeposu(UygulamaDbContext db) : Depo<Kullanici>(db)
     public bool EpostaVarMi(string eposta) =>
         Db.Kullanicilar.Any(k => k.Eposta == eposta);
 
+    public Kullanici? ProfilIleBul(int id) =>
+        Db.Kullanicilar.AsNoTracking().Include(k => k.Profil).FirstOrDefault(k => k.Id == id);
+
     public List<Kullanici> ProfilliOgrenciler(int haricKullaniciId) =>
         Db.Kullanicilar.AsNoTracking()
             .Include(k => k.Profil)
             .Include(k => k.Cevaplar)
             .Where(k => k.Rol == Rol.Ogrenci && k.Id != haricKullaniciId && k.Profil != null)
             .ToList();
+}
+
+public class EslesmeDeposu(UygulamaDbContext db) : Depo<Eslesme>(db)
+{
+    // Iki kisi arasindaki istek, kim gonderdiyse.
+    public Eslesme? Arasinda(int a, int b) =>
+        Db.Eslesmeler.AsNoTracking().FirstOrDefault(e =>
+            (e.GonderenId == a && e.AliciId == b) || (e.GonderenId == b && e.AliciId == a));
+
+    public List<Eslesme> KullanicininEslesmeleri(int kullaniciId) =>
+        Db.Eslesmeler.AsNoTracking()
+            .Include(e => e.Gonderen).ThenInclude(k => k!.Profil)
+            .Include(e => e.Alici).ThenInclude(k => k!.Profil)
+            .Where(e => e.GonderenId == kullaniciId || e.AliciId == kullaniciId)
+            .OrderByDescending(e => e.OlusturmaTarihi)
+            .ToList();
+
+    public int BekleyenGidenSayisi(int kullaniciId) =>
+        Db.Eslesmeler.Count(e => e.GonderenId == kullaniciId && e.Durum == EslesmeDurumu.Beklemede);
+}
+
+public class UyumSkoruDeposu(UygulamaDbContext db) : Depo<UyumSkoru>(db)
+{
+    public UyumSkoru? Bul(int a, int b)
+    {
+        var (kucuk, buyuk) = Sirala(a, b);
+        return Db.UyumSkorlari.AsNoTracking()
+            .FirstOrDefault(s => s.KullaniciAId == kucuk && s.KullaniciBId == buyuk);
+    }
+
+    public void Kaydet(int a, int b, double skor, DateTime simdi)
+    {
+        var (kucuk, buyuk) = Sirala(a, b);
+        Ekle(new UyumSkoru { KullaniciAId = kucuk, KullaniciBId = buyuk, Skor = skor, HesaplamaTarihi = simdi });
+    }
+
+    // Tabloda her cift tek satirdir ve kucuk kimlik her zaman A tarafindadir (CHECK kisiti).
+    private static (int, int) Sirala(int a, int b) => a < b ? (a, b) : (b, a);
 }
 
 public class IlanDeposu(UygulamaDbContext db) : Depo<Ilan>(db)
@@ -78,6 +119,8 @@ public class AnketDeposu(UygulamaDbContext db) : Depo<AnketSorusu>(db)
         Db.ChangeTracker.Clear();
         using var islem = Db.Database.BeginTransaction();
         Db.AnketCevaplari.Where(c => c.KullaniciId == kullaniciId).ExecuteDelete();
+        // Cevaplar degisince bu kullaniciya ait onbellekteki uyum skorlari gecersiz olur.
+        Db.UyumSkorlari.Where(s => s.KullaniciAId == kullaniciId || s.KullaniciBId == kullaniciId).ExecuteDelete();
         Db.AnketCevaplari.AddRange(cevaplar);
         Db.SaveChanges();
         islem.Commit();

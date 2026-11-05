@@ -1,6 +1,6 @@
-# Arkadaş Bul ve Uyum Skoru
+# Uyum Skoru
 
-**Arkadaş bul** sayfası, profilini ve anketini tamamlamış diğer öğrencileri kullanıcıya uyumlarına göre sıralar.
+Hesap `UyumHesaplayici` sınıfındadır. Sınıf veritabanına ve oturuma bağlı değildir, yalnızca iki kişinin cevaplarından skor üretir. Bu sayede tek başına test edilebilir.
 
 ## Hesaplama
 
@@ -20,20 +20,12 @@ Uyum = Σ(Benzerlik × Ağırlık) / Σ(Ağırlık) × 100
 - Aynı cevap benzerlik 1, en uzak cevap (1 ile 5) benzerlik 0 verir.
 - İki kişinin de önem verdiği sorular skoru daha çok etkiler.
 - Ağırlık iki kişinin ortalaması olduğu için A'nın B'ye uyumu, B'nin A'ya uyumuyla aynıdır.
-- "En uyumlu" ve "en farklı" alanları aynı formülün kategori bazında hesaplanmasıyla bulunur.
+- "En uyumlu" ve "en farklı" konular aynı formülün kategori bazında hesaplanmasıyla bulunur.
 
-## Kurallar
+## Saklama
 
-| Kural | Neden |
-| --- | --- |
-| Adayları görmek için kendi anketini tamamlamak gerekir | Karşılaştıracak cevap olmadan skor hesaplanamaz. |
-| Eksik profil veya anketi olanlar listelenmez | Skoru veya bilgileri eksik kişi gösterilmez. |
-| Kullanıcının kendisi ve yöneticiler listelenmez | Yalnızca arkadaş arayan öğrenciler görünür. |
+Skorlar `UyumSkoru` tablosunda önbellek olarak tutulur (`UyumServisi`):
 
-## Gizlilik
-
-Sayfada ad, bölüm, şehir, yaş, hakkında yazısı ve uyum bilgileri görünür. E-posta, doğum yılı ve tek tek anket cevapları gösterilmez; `AdayOzeti` bu alanları hiç taşımaz.
-
-## Şimdilik yapılmayanlar
-
-Skor her açılışta hesaplanır, henüz `UyumSkoru` tablosuna yazılmaz. Arkadaşlık isteği ve mesajlaşma ilgili haftalarda eklenecek.
+- **Tek satır kuralı:** Her çift için tek satır vardır. Küçük kimlik her zaman `KullaniciAId` tarafındadır; bunu `CHECK (KullaniciAId < KullaniciBId)` kısıtı ve benzersiz indeks sağlar.
+- **Okuma:** Skor istendiğinde önce tabloya bakılır, yoksa hesaplanıp yazılır.
+- **Geçersiz kılma:** Bir kullanıcı anketini değiştirince ona ait tüm skorlar, cevaplarla aynı transaction içinde silinir. Bu yüzden eski skor gösterilmez.

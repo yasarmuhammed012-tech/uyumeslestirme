@@ -261,6 +261,9 @@ namespace UyumEslestirme.Data.Migrations
                     b.Property<int>("DogumYili")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("Gorunur")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Hakkinda")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");

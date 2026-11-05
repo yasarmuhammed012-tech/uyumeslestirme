@@ -50,8 +50,10 @@ public sealed class AnaForm : Form
 
         if (oturum.Rol == Rol.Ogrenci)
         {
-            var adaylar = new AdaylarSekmesi(servisler.Adaylar, servisler.Anket);
+            var adaylar = new AdaylarSekmesi(servisler.Adaylar, servisler.Anket, servisler.Eslesme);
             SayfaEkle("Arkadaş bul", adaylar, adaylar.Yenile);
+            var eslesmeler = new EslesmelerSekmesi(servisler.Eslesme);
+            SayfaEkle("Eşleşmelerim", eslesmeler, eslesmeler.Yenile);
         }
 
         // Menude gizlemek yalnizca kolayliktir; asil yetki kontrolu YonetimServisi icindedir.
