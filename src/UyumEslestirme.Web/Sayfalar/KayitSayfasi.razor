@@ -1,0 +1,42 @@
+@inherits SayfaTabani
+
+<h2>Kayıt ol</h2>
+<p class="soluk">Yeni bir öğrenci hesabı oluştur.</p>
+
+<form @onsubmit="Kaydol">
+    <label>Ad soyad <input @bind="_adSoyad" @bind:event="oninput" autocomplete="name" /></label>
+    <label>E-posta <input type="email" @bind="_eposta" @bind:event="oninput" autocomplete="email" /></label>
+    <label>Parola <input type="password" @bind="_parola" @bind:event="oninput" autocomplete="new-password" /></label>
+    <label>Parola (tekrar) <input type="password" @bind="_parolaTekrar" @bind:event="oninput" autocomplete="new-password" /></label>
+    <p class="soluk kucuk">Parola en az @KimlikServisi.AsgariParolaUzunlugu karakter olmalı, harf ve rakam içermeli.</p>
+
+    <Uyari Hata="@Hata" />
+
+    <button type="submit" class="birincil genis" disabled="@_bekliyor">@(_bekliyor ? "Kaydediliyor…" : "Kayıt ol")</button>
+</form>
+
+<p class="alt-baglanti"><a href="" @onclick="Vazgec" @onclick:preventDefault>← Girişe dön</a></p>
+
+@code {
+    [Parameter] public EventCallback Tamamlandi { get; set; }
+    [Parameter] public EventCallback Vazgec { get; set; }
+
+    private string _adSoyad = "";
+    private string _eposta = "";
+    private string _parola = "";
+    private string _parolaTekrar = "";
+    private bool _bekliyor;
+
+    private async Task Kaydol()
+    {
+        _bekliyor = true;
+        Hata = null;
+        StateHasChanged();
+        await Task.Delay(20);
+
+        var basarili = Dene(() => S.Kimlik.KayitOl(_adSoyad, _eposta, _parola, _parolaTekrar));
+        _bekliyor = false;
+        if (basarili)
+            await Tamamlandi.InvokeAsync();
+    }
+}

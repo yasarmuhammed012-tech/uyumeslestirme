@@ -9,7 +9,8 @@ namespace UyumEslestirme.Business;
 public static class ParolaHasleyici
 {
     private const string Sema = "pbkdf2-sha256";
-    private const int Tekrar = 600_000;
+    // Web surumu bu degeri dusurur: tarayicida 600 bin tekrar her giriste dakikalar surer.
+    public static int Tekrar { get; set; } = 600_000;
     private const int TuzBoyutu = 16;
     private const int OzetBoyutu = 32;
 

@@ -1,0 +1,13 @@
+@if (Hata is not null)
+{
+    <div class="uyari hata" role="alert">@Hata</div>
+}
+else if (Bilgi is not null)
+{
+    <div class="uyari basari" role="status">@Bilgi</div>
+}
+
+@code {
+    [Parameter] public string? Hata { get; set; }
+    [Parameter] public string? Bilgi { get; set; }
+}

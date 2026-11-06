@@ -1,0 +1,14 @@
+<div class="olcek" role="radiogroup" aria-label="@Etiket">
+    @for (var i = AnketServisi.AsgariOlcek; i <= AnketServisi.AzamiOlcek; i++)
+    {
+        var deger = i;
+        <button type="button" role="radio" aria-checked="@(Deger == deger ? "true" : "false")"
+                class="@(Deger == deger ? "secili" : null)" @onclick="() => DegerChanged.InvokeAsync(deger)">@deger</button>
+    }
+</div>
+
+@code {
+    [Parameter] public int Deger { get; set; }
+    [Parameter] public EventCallback<int> DegerChanged { get; set; }
+    [Parameter] public string Etiket { get; set; } = "";
+}

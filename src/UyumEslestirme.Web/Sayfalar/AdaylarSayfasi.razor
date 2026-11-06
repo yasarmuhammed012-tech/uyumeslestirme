@@ -1,0 +1,74 @@
+@inherits SayfaTabani
+
+<SayfaBasligi Baslik="Arkadaş bul" Aciklama="Profilini ve anketini tamamlamış öğrenciler seninle uyumlarına göre sıralanır. Beğendiğin kişiye istek gönder." />
+
+<div class="filtre">
+    <label>
+        Şehir
+        <select @bind="_sehir">
+            <option value="">Tümü</option>
+            @foreach (var sehir in _adaylar.Select(a => a.Sehir).Distinct().Order())
+            {
+                <option value="@sehir">@sehir</option>
+            }
+        </select>
+    </label>
+    <span class="soluk">@Gorunenler.Count() kişi</span>
+</div>
+
+<Uyari Hata="@Hata" Bilgi="@Bilgi" />
+
+@foreach (var a in Gorunenler)
+{
+    <KisiKarti Ad="@a.AdSoyad" Satirlar="@([$"{a.Bolum} · {a.Sehir} · {a.Yas} yaş"])" Uyum="a.UyumYuzdesi">
+        <Ek>
+            @if (!string.IsNullOrWhiteSpace(a.Hakkinda))
+            {
+                <p>@a.Hakkinda</p>
+            }
+            <p class="etiketler">
+                <span class="etiket iyi">En uyumlu: @Arayuz.KategoriAdi(a.EnUyumluKategori)</span>
+                <span class="etiket fark">En farklı: @Arayuz.KategoriAdi(a.EnFarkliKategori)</span>
+            </p>
+        </Ek>
+        <Eylemler>
+            @switch (a.Durum)
+            {
+                case AdayDurumu.Yok:
+                    <button class="birincil" @onclick="() => IstekGonder(a)">İstek gönder</button>
+                    break;
+                case AdayDurumu.IstekGonderildi:
+                    <span class="durum bekliyor">İstek gönderildi</span>
+                    break;
+                case AdayDurumu.IstekGeldi:
+                    <span class="durum bekliyor">Size istek gönderdi, Eşleşmelerim'den yanıtlayın</span>
+                    break;
+                case AdayDurumu.Eslesti:
+                    <span class="durum basari">✓ Eşleştiniz</span>
+                    break;
+            }
+        </Eylemler>
+    </KisiKarti>
+}
+
+@if (Hata is null && !Gorunenler.Any())
+{
+    <div class="bos">Şu an listelenecek kimse yok.</div>
+}
+
+@code {
+    private List<AdayOzeti> _adaylar = [];
+    private string _sehir = "";
+
+    private IEnumerable<AdayOzeti> Gorunenler => _sehir == "" ? _adaylar : _adaylar.Where(a => a.Sehir == _sehir);
+
+    protected override void OnInitialized() => Dene(Yukle);
+
+    private void Yukle() => _adaylar = S.Adaylar.Adaylar();
+
+    private void IstekGonder(AdayOzeti aday)
+    {
+        if (Dene(() => { S.Eslesme.IstekGonder(aday.KullaniciId); Yukle(); }))
+            Bilgi = $"{aday.AdSoyad} kişisine istek gönderildi.";
+    }
+}

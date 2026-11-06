@@ -1,0 +1,62 @@
+@inherits SayfaTabani
+
+<h2>Giriş yap</h2>
+<p class="soluk">Hesabınla oturum aç.</p>
+
+<form @onsubmit="Gir">
+    <label>
+        E-posta
+        <input type="email" @bind="_eposta" @bind:event="oninput" autocomplete="username" />
+    </label>
+    <label>
+        Parola
+        <input type="@(_goster ? "text" : "password")" @bind="_parola" @bind:event="oninput" autocomplete="current-password" />
+    </label>
+    <label class="secenek"><input type="checkbox" @bind="_goster" /> Parolayı göster</label>
+
+    <Uyari Hata="@Hata" Bilgi="@(Hata is null ? Mesaj : null)" />
+
+    <button type="submit" class="birincil genis" disabled="@_bekliyor">@(_bekliyor ? "Giriş yapılıyor…" : "Giriş yap")</button>
+</form>
+
+<p class="alt-baglanti">Hesabınız yok mu? <a href="" @onclick="KayitAc" @onclick:preventDefault>Kayıt olun</a></p>
+
+<div class="demo-kutu">
+    <b>Demo hesaplar</b> (parola <code>@Demo.Parola</code>)
+    <div class="demo-dugmeler">
+        <button type="button" class="ikincil" @onclick="() => Doldur(Demo.Ogrenci)">Öğrenci</button>
+        <button type="button" class="ikincil" @onclick="() => Doldur(Demo.Yonetici)">Yönetici</button>
+    </div>
+    <span class="soluk">Diğer öğrenciler: ogrenci02 … ogrenci20@@ornek.test</span>
+</div>
+
+@code {
+    [Parameter] public EventCallback KayitAc { get; set; }
+    [Parameter] public EventCallback GirisYapildi { get; set; }
+    [Parameter] public string? Mesaj { get; set; }
+
+    private string _eposta = "";
+    private string _parola = "";
+    private bool _goster;
+    private bool _bekliyor;
+
+    private void Doldur(string eposta)
+    {
+        _eposta = eposta;
+        _parola = Demo.Parola;
+    }
+
+    private async Task Gir()
+    {
+        _bekliyor = true;
+        Hata = null;
+        // Parola ozeti hesaplanirken dugmenin "Giris yapiliyor" hali once ekrana cizilsin.
+        StateHasChanged();
+        await Task.Delay(20);
+
+        var basarili = Dene(() => S.Kimlik.GirisYap(_eposta, _parola));
+        _bekliyor = false;
+        if (basarili)
+            await GirisYapildi.InvokeAsync();
+    }
+}

@@ -1,0 +1,41 @@
+@inherits SayfaTabani
+
+<SayfaBasligi Baslik="Yönetim" Aciklama="Kayıtlı kullanıcılar. Parola özetleri bu ekrana hiç gelmez." />
+
+<div class="filtre">
+    <label>Ara <input @bind="_arama" @bind:event="oninput" placeholder="Ad veya e-posta" /></label>
+    <span class="soluk">@Gorunenler.Count() kullanıcı</span>
+</div>
+
+<Uyari Hata="@Hata" />
+
+<div class="kart tablo-kart">
+    <table>
+        <thead>
+            <tr><th>No</th><th>Ad soyad</th><th>E-posta</th><th>Rol</th><th>Kayıt tarihi</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var k in Gorunenler)
+            {
+                <tr>
+                    <td>@k.Id</td>
+                    <td>@k.AdSoyad</td>
+                    <td>@k.Eposta</td>
+                    <td><span class="etiket @(k.Rol == Rol.Yonetici ? "fark" : "iyi")">@Arayuz.RolAdi(k.Rol)</span></td>
+                    <td>@Arayuz.Tarih(k.OlusturmaTarihi)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<KullaniciOzeti> _kullanicilar = [];
+    private string _arama = "";
+
+    private IEnumerable<KullaniciOzeti> Gorunenler => _kullanicilar.Where(k =>
+        k.AdSoyad.Contains(_arama, StringComparison.CurrentCultureIgnoreCase)
+        || k.Eposta.Contains(_arama, StringComparison.OrdinalIgnoreCase));
+
+    protected override void OnInitialized() => Dene(() => _kullanicilar = S.Yonetim.KullanicilariListele());
+}

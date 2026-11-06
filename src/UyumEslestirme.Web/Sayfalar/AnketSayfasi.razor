@@ -1,0 +1,59 @@
+@inherits SayfaTabani
+
+<SayfaBasligi Baslik="Tercih anketi" Aciklama="Cevap: 1 = hiç katılmıyorum, 5 = tamamen katılıyorum. Önem: 1 = benim için önemsiz, 5 = çok önemli." />
+
+@foreach (var grup in _sorular.GroupBy(s => s.Kategori))
+{
+    <section class="kart">
+        <div class="anket-satir anket-baslik">
+            <h3>@Arayuz.KategoriAdi(grup.Key)</h3>
+            <span>Cevap</span>
+            <span>Önem</span>
+        </div>
+        @foreach (var soru in grup)
+        {
+            <div class="anket-satir">
+                <span>@soru.Sira. @soru.Metin</span>
+                <Olcek @bind-Deger="_cevap[soru.Id]" Etiket="@($"Soru {soru.Sira} cevap")" />
+                <Olcek @bind-Deger="_onem[soru.Id]" Etiket="@($"Soru {soru.Sira} önem")" />
+            </div>
+        }
+    </section>
+}
+
+<div class="alt-cubuk">
+    <Uyari Hata="@Hata" Bilgi="@Bilgi" />
+    <button class="birincil" @onclick="Kaydet">Anketi kaydet</button>
+</div>
+
+@code {
+    private List<AnketSorusu> _sorular = [];
+    private readonly Dictionary<int, int> _cevap = [];
+    private readonly Dictionary<int, int> _onem = [];
+
+    protected override void OnInitialized() => Dene(() =>
+    {
+        _sorular = S.Anket.Sorular();
+        var cevaplar = S.Anket.BenimCevaplarim().ToDictionary(c => c.SoruId);
+        foreach (var soru in _sorular)
+        {
+            cevaplar.TryGetValue(soru.Id, out var c);
+            _cevap[soru.Id] = c?.Deger ?? 0;
+            _onem[soru.Id] = c?.Agirlik ?? 0;
+        }
+    });
+
+    private void Kaydet()
+    {
+        if (_sorular.Any(s => _cevap[s.Id] == 0 || _onem[s.Id] == 0))
+        {
+            Bilgi = null;
+            Hata = "Lütfen tüm sorular için cevap ve önem seçin.";
+            return;
+        }
+
+        var girdiler = _sorular.Select(s => new CevapGirdisi(s.Id, _cevap[s.Id], _onem[s.Id])).ToList();
+        if (Dene(() => S.Anket.CevaplariKaydet(girdiler)))
+            Bilgi = "✓ Anket kaydedildi. Uyum skorların yeniden hesaplanacak.";
+    }
+}

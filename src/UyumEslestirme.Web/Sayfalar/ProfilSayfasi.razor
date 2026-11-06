@@ -1,0 +1,66 @@
+@inherits SayfaTabani
+
+<SayfaBasligi Baslik="Profil" Aciklama="Bu bilgiler Arkadaş bul listesinde diğer öğrencilere gösterilir. E-postan yalnızca eşleştiğin kişiye görünür." />
+
+<div class="izgara">
+    <section class="kart">
+        <h3>Bilgilerim</h3>
+        <div class="ikili">
+            <label>Bölüm <input @bind="_bolum" placeholder="Bilgisayar Programcılığı" /></label>
+            <label>Şehir <input @bind="_sehir" placeholder="Bingöl" /></label>
+        </div>
+        <label>Doğum yılı <input type="number" @bind="_dogumYili" placeholder="2004" /></label>
+        <label>Hakkında <textarea rows="4" maxlength="500" @bind="_hakkinda" placeholder="Kendini kısaca tanıt (isteğe bağlı)"></textarea></label>
+        <label class="secenek"><input type="checkbox" @bind="_gorunur" /> Profilim Arkadaş bul listesinde görünsün</label>
+
+        <Uyari Hata="@Hata" Bilgi="@Bilgi" />
+        <button class="birincil" @onclick="Kaydet">Profili kaydet</button>
+    </section>
+
+    <section class="kart">
+        <h3>Tercih özetim</h3>
+        @if (_ozet.Count == 0)
+        {
+            <p class="soluk">Tercih anketini doldurduğunda kategori bazında özetin burada görünür.</p>
+        }
+        else
+        {
+            @foreach (var k in _ozet)
+            {
+                <div class="ozet-satir">
+                    <div class="ozet-ust"><b>@Arayuz.KategoriAdi(k.Kategori)</b><span class="soluk">@k.Ortalama.ToString("0.0")/5 · önem %@k.AgirlikYuzdesi.ToString("0")</span></div>
+                    <div class="cubuk"><div style="width:@Arayuz.Yuzde((k.Ortalama - 1) / 4)"></div></div>
+                </div>
+            }
+        }
+    </section>
+</div>
+
+@code {
+    private string _bolum = "";
+    private string _sehir = "";
+    private int? _dogumYili;
+    private string? _hakkinda;
+    private bool _gorunur = true;
+    private List<KategoriOzeti> _ozet = [];
+
+    protected override void OnInitialized() => Dene(() =>
+    {
+        var profil = S.Profil.BenimProfilim();
+        if (profil is not null)
+        {
+            _bolum = profil.Bolum;
+            _sehir = profil.Sehir;
+            _dogumYili = profil.DogumYili;
+            _hakkinda = profil.Hakkinda;
+            _gorunur = profil.Gorunur;
+        }
+        _ozet = S.Anket.TercihOzeti();
+    });
+
+    private void Kaydet()
+    {
+        if (Dene(() => S.Profil.Kaydet(new ProfilGirdisi(_bolum, _sehir, _dogumYili ?? 0, _hakkinda, _gorunur))))
+            Bilgi = "✓ Profil kaydedildi.";
+    }
+}

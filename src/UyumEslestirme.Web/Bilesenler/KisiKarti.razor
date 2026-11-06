@@ -1,0 +1,28 @@
+@* Arkadas bul ve Eslesmelerim listelerinde kullanilan ortak kart. *@
+<article class="kart kisi">
+    <div class="avatar buyuk">@Arayuz.BasHarfler(Ad)</div>
+    <div class="kisi-bilgi">
+        <h3>@Ad</h3>
+        @foreach (var satir in Satirlar)
+        {
+            <p class="soluk">@satir</p>
+        }
+        @Ek
+    </div>
+    <div class="kisi-sag">
+        @if (Uyum is not null)
+        {
+            <div class="yuzde">%@Uyum.Value.ToString("0")<small> uyum</small></div>
+            <div class="cubuk"><div style="width:@Arayuz.Yuzde(Uyum.Value / 100)"></div></div>
+        }
+        <div class="eylemler">@Eylemler</div>
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public string Ad { get; set; } = "";
+    [Parameter] public IReadOnlyList<string> Satirlar { get; set; } = [];
+    [Parameter] public double? Uyum { get; set; }
+    [Parameter] public RenderFragment? Ek { get; set; }
+    [Parameter] public RenderFragment? Eylemler { get; set; }
+}

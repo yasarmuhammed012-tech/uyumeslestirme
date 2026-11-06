@@ -1,0 +1,80 @@
+@inherits SayfaTabani
+
+<SayfaBasligi Baslik="Eşleşmelerim" Aciklama="Gelen istekleri yanıtla. İki taraf da kabul edince iletişim bilgileri görünür." />
+
+<Uyari Hata="@Hata" Bilgi="@Bilgi" />
+
+@if (_listeler is not null)
+{
+    <h2 class="bolum">Gelen istekler (@_listeler.GelenIstekler.Count)</h2>
+    @foreach (var e in _listeler.GelenIstekler)
+    {
+        <KisiKarti Ad="@e.AdSoyad" Satirlar="@Satirlar(e)" Uyum="e.UyumYuzdesi">
+            <Eylemler>
+                <button class="birincil" @onclick="() => Yanitla(e, true)">Kabul et</button>
+                <button class="ikincil" @onclick="() => Yanitla(e, false)">Reddet</button>
+            </Eylemler>
+        </KisiKarti>
+    }
+    @if (_listeler.GelenIstekler.Count == 0)
+    {
+        <div class="bos">Yanıt bekleyen istek yok.</div>
+    }
+
+    <h2 class="bolum">Gönderdiğim istekler (@_listeler.GonderilenIstekler.Count)</h2>
+    @foreach (var e in _listeler.GonderilenIstekler)
+    {
+        <KisiKarti Ad="@e.AdSoyad" Satirlar="@Satirlar(e)" Uyum="e.UyumYuzdesi">
+            <Eylemler>
+                @if (e.Durum == EslesmeDurumu.Red)
+                {
+                    <span class="durum red">Reddedildi</span>
+                }
+                else
+                {
+                    <span class="durum bekliyor">Yanıt bekleniyor</span>
+                    <button class="ikincil" @onclick="() => GeriCek(e)">Geri çek</button>
+                }
+            </Eylemler>
+        </KisiKarti>
+    }
+    @if (_listeler.GonderilenIstekler.Count == 0)
+    {
+        <div class="bos">Gönderdiğin istek yok. Arkadaş bul sayfasından istek gönderebilirsin.</div>
+    }
+
+    <h2 class="bolum">Eşleşmeler (@_listeler.Eslesmeler.Count)</h2>
+    @foreach (var e in _listeler.Eslesmeler)
+    {
+        <KisiKarti Ad="@e.AdSoyad" Satirlar="@([.. Satirlar(e), $"İletişim: {e.Eposta}"])" Uyum="e.UyumYuzdesi">
+            <Eylemler><span class="durum basari">✓ Eşleştiniz</span></Eylemler>
+        </KisiKarti>
+    }
+    @if (_listeler.Eslesmeler.Count == 0)
+    {
+        <div class="bos">Henüz eşleşmen yok.</div>
+    }
+}
+
+@code {
+    private EslesmeListeleri? _listeler;
+
+    protected override void OnInitialized() => Dene(Yukle);
+
+    private void Yukle() => _listeler = S.Eslesme.Listele();
+
+    private static List<string> Satirlar(EslesmeOzeti e) =>
+        [$"{e.Bolum} · {e.Sehir}", $"Tarih: {Arayuz.Tarih(e.Tarih)}"];
+
+    private void Yanitla(EslesmeOzeti e, bool kabul)
+    {
+        if (Dene(() => { S.Eslesme.Yanitla(e.EslesmeId, kabul); Yukle(); }))
+            Bilgi = kabul ? $"{e.AdSoyad} ile eşleştiniz." : $"{e.AdSoyad} kişisinin isteği reddedildi.";
+    }
+
+    private void GeriCek(EslesmeOzeti e)
+    {
+        if (Dene(() => { S.Eslesme.GeriCek(e.EslesmeId); Yukle(); }))
+            Bilgi = $"{e.AdSoyad} kişisine gönderilen istek geri çekildi.";
+    }
+}

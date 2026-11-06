@@ -4,6 +4,8 @@
 
 **Ders:** Bilgisayar Uygulamaları I — Bingöl Üniversitesi, Bilgisayar Programcılığı
 
+**Tarayıcıda dene:** https://yasarmuhammed012-tech.github.io/uyumeslestirme/
+
 ## Teknoloji
 
 | Alan | Seçim |
@@ -27,6 +29,19 @@ dotnet run --project src/UyumEslestirme.Desktop
 - Yönetici: `yonetici@ornek.test`
 - Öğrenci: `ogrenci01@ornek.test` ... `ogrenci20@ornek.test`
 
+### Web sürümü
+
+Aynı iş ve veri katmanları Blazor WebAssembly arayüzüyle tarayıcıda da çalışır. `main` dalına her gönderimde GitHub Actions testleri çalıştırır ve siteyi GitHub Pages'te yayınlar. Yerelde çalıştırmak için:
+
+```powershell
+dotnet run --project src/UyumEslestirme.Web
+```
+
+Web sürümü bir demodur, masaüstünden şu açılardan ayrılır:
+
+- **Veri:** SQLite yerine bellek içi veritabanı kullanır. Veriler yalnızca o tarayıcı sekmesinde tutulur, sayfa yenilenince demo verilere döner.
+- **Parola özeti:** Tarayıcıda hızlı giriş için PBKDF2 tekrar sayısı düşürülmüştür. Burada gerçek parola kullanılmamalıdır.
+
 Testler:
 
 ```powershell
@@ -41,6 +56,7 @@ src/
   UyumEslestirme.Data/      Veritabanı ve veri erişimi
   UyumEslestirme.Business/  İş kuralları ve doğrulama
   UyumEslestirme.Desktop/   Windows Forms arayüzü
+  UyumEslestirme.Web/       Tarayıcı arayüzü (Blazor WebAssembly)
 tests/
   UyumEslestirme.Tests/     Birim testleri
 docs/                       ER diyagramı, mimari ve haftalık notlar

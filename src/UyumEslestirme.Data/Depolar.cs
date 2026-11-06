@@ -112,17 +112,27 @@ public class AnketDeposu(UygulamaDbContext db) : Depo<AnketSorusu>(db)
             .OrderBy(c => c.Soru!.Sira)
             .ToList();
 
-    // Eski cevaplarin silinmesi ve yenilerin eklenmesi tek islemdir: yarida kalirsa eski cevaplar korunur.
+    // Tum degisiklikler tek SaveChanges ile yazilir; EF bunu tek transaction icinde yapar,
+    // yarida kalirsa eski cevaplar korunur. ExecuteDelete kullanilmaz: ayni kod web surumundeki
+    // bellek ici veritabaninda da calisir.
     public void CevaplariDegistir(int kullaniciId, IReadOnlyList<AnketCevabi> cevaplar)
     {
-        // ExecuteDelete takip edilen nesneleri bilmez; ayni anahtarli eski kayitlar cakismasin diye takip temizlenir.
-        Db.ChangeTracker.Clear();
-        using var islem = Db.Database.BeginTransaction();
-        Db.AnketCevaplari.Where(c => c.KullaniciId == kullaniciId).ExecuteDelete();
+        var yeniler = cevaplar.ToDictionary(c => c.SoruId);
+        foreach (var eski in Db.AnketCevaplari.Where(c => c.KullaniciId == kullaniciId).ToList())
+        {
+            if (yeniler.Remove(eski.SoruId, out var yeni))
+            {
+                eski.Deger = yeni.Deger;
+                eski.Agirlik = yeni.Agirlik;
+            }
+            else
+            {
+                Db.AnketCevaplari.Remove(eski);
+            }
+        }
+        Db.AnketCevaplari.AddRange(yeniler.Values);
         // Cevaplar degisince bu kullaniciya ait onbellekteki uyum skorlari gecersiz olur.
-        Db.UyumSkorlari.Where(s => s.KullaniciAId == kullaniciId || s.KullaniciBId == kullaniciId).ExecuteDelete();
-        Db.AnketCevaplari.AddRange(cevaplar);
+        Db.UyumSkorlari.RemoveRange(Db.UyumSkorlari.Where(s => s.KullaniciAId == kullaniciId || s.KullaniciBId == kullaniciId));
         Db.SaveChanges();
-        islem.Commit();
     }
 }

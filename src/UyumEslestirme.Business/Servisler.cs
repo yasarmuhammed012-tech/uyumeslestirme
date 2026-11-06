@@ -1,10 +1,9 @@
-using UyumEslestirme.Business;
 using UyumEslestirme.Data;
 using UyumEslestirme.Domain;
 
-namespace UyumEslestirme.Desktop;
+namespace UyumEslestirme.Business;
 
-// Formlarin kullandigi servisleri tek yerde olusturur.
+// Arayuzlerin (masaustu ve web) kullandigi servisleri tek yerde olusturur.
 public sealed class Servisler
 {
     public OturumYoneticisi Oturum { get; }

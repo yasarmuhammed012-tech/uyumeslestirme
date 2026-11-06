@@ -1,0 +1,9 @@
+<header class="sayfa-basligi">
+    <h1>@Baslik</h1>
+    <p>@Aciklama</p>
+</header>
+
+@code {
+    [Parameter, EditorRequired] public string Baslik { get; set; } = "";
+    [Parameter] public string? Aciklama { get; set; }
+}
