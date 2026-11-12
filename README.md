@@ -75,6 +75,7 @@ docs/                       ER diyagramı, mimari ve haftalık notlar
 - [Hafta 8: Ara sürüm, entegrasyon ve demo senaryosu](docs/hafta-8-ara-surum.md)
 - [Uyum skoru hesabı](docs/uyum-skoru.md)
 - [Değişiklik günlüğü](CHANGELOG.md)
+- [Haftalık raporlar ve AI kullanım günlükleri](raporlar/)
 
 ## Haftalık ilerleme
 
