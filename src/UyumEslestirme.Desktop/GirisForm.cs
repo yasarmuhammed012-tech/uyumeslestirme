@@ -72,6 +72,9 @@ public sealed class GirisForm : Form
         icerik.Controls.Add(aciklama);
         foreach (var madde in new[] { "Profilinizi oluşturun", "Tercih anketini doldurun", "Size uyan kişileri görün" })
             icerik.Controls.Add(Tema.Etiket("✓  " + madde, Tema.Govde, Color.White, genislik));
+        var surum = Tema.Etiket(UygulamaSurumu.Metin, Tema.Kucuk, Tema.BirincilSoluk, genislik);
+        surum.Margin = new Padding(0, 28, 0, 0);
+        icerik.Controls.Add(surum);
 
         var panel = new Panel { Dock = DockStyle.Left, Width = 320, BackColor = Tema.Koyu, Padding = new Padding(30, 56, 30, 24) };
         panel.Controls.Add(icerik);

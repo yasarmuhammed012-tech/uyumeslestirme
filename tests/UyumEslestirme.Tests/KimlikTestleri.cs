@@ -118,6 +118,20 @@ public sealed class KimlikTestleri : IDisposable
         Assert.True(_oturum.Acik);
     }
 
+    // Hafta 8 duzeltmesi: kilit mesaji farkli oldugu icin 5 denemeden sonra hesabin var oldugu anlasiliyordu.
+    [Fact]
+    public void Kilitli_hesap_olmayan_hesapla_ayni_mesaji_verir()
+    {
+        Kaydet();
+        for (var i = 0; i < KimlikServisi.AzamiDeneme; i++)
+            Assert.Throws<IsKuraliHatasi>(() => _kimlik.GirisYap("a@ornek.test", "Yanlis1234"));
+
+        var kilitli = Assert.Throws<IsKuraliHatasi>(() => _kimlik.GirisYap("a@ornek.test", "Yanlis1234"));
+        var olmayan = Assert.Throws<IsKuraliHatasi>(() => _kimlik.GirisYap("yok@ornek.test", "Yanlis1234"));
+
+        Assert.Equal(olmayan.Message, kilitli.Message);
+    }
+
     [Fact]
     public void Basarili_giris_deneme_sayacini_sifirlar()
     {

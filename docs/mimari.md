@@ -1,17 +1,21 @@
 # Mimari
 
-Uygulama üç mantıksal katmandan (sunum, iş, veri) ve ortak bir varlık projesinden oluşur.
+Uygulama üç mantıksal katmandan (sunum, iş, veri) ve ortak bir varlık projesinden oluşur. Sunum katmanında iki arayüz vardır: masaüstü (Windows Forms) ve web (Blazor WebAssembly). İkisi de servisleri iş katmanındaki `Servisler` sınıfından alır.
 
 ```mermaid
 flowchart TD
     D["Sunum: UyumEslestirme.Desktop<br/>Formlar, kullanıcı etkileşimi"]
+    W["Sunum: UyumEslestirme.Web<br/>Tarayıcı arayüzü"]
     B["İş: UyumEslestirme.Business<br/>Kurallar, doğrulama, yetki"]
     R["Veri: UyumEslestirme.Data<br/>EF Core, depolar, migration"]
     M["Varlıklar: UyumEslestirme.Domain"]
     S[("SQLite")]
+    I[("Bellek içi veritabanı")]
     D --> B
+    W --> B
     B --> R
     R --> S
+    R --> I
     D -. kullanır .-> M
     B -. kullanır .-> M
     R -. kullanır .-> M

@@ -34,5 +34,5 @@ Roller `Ogrenci` ve `Yonetici`'dir. Kontrol iş katmanındadır: `YonetimServisi
 ## Bilinen sınırlar
 
 - **Yerel veritabanı:** SQLite dosyası kullanıcının bilgisayarındadır. Uygulama dışından dosyaya erişebilen biri parola özetleri dahil verileri okuyabilir, rol kaydını da değiştirebilir. Yetki kontrolü bu saldırıya karşı koruma sağlamaz. Gerçek çok kullanıcılı kullanımda veri merkezi bir sunucuda tutulmalıdır.
-- **Hesap kilidi:** Kilit mesajı bir hesabın var olduğunu açığa çıkarabilir ve bir başkasının hesabını geçici olarak kilitlemek mümkündür.
+- **Hesap kilidi:** Bir başkasının hesabını geçici olarak kilitlemek mümkündür. Kilit mesajının hesabın var olduğunu açığa çıkarması Hafta 8'de giderildi ([ayrıntı](hafta-8-ara-surum.md#giderilen-hatalar)).
 - **Demo hesaplar:** Yalnızca Debug derlemesinde oluşur ve parolası kaynak kodda açıktır (`Demo1234`). Release derlemesinde oluşmaz.

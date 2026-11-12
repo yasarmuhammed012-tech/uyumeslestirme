@@ -27,7 +27,7 @@
                     }
                 </section>
             </div>
-            <p class="demo-notu">Web demosu: veriler yalnızca bu tarayıcı sekmesinde tutulur, sayfa yenilenince demo verilere döner.</p>
+            <p class="demo-notu">@UygulamaSurumu.Metin · Web demosu: veriler yalnızca bu tarayıcı sekmesinde tutulur, sayfa yenilenince demo verilere döner.</p>
         </div>
     }
     else
@@ -49,6 +49,7 @@
                     }
                 </nav>
                 <button class="cikis" @onclick="CikisYap">Çıkış yap</button>
+                <span class="surum">@UygulamaSurumu.Metin</span>
             </aside>
             <main class="icerik">
                 @switch (_sayfa)

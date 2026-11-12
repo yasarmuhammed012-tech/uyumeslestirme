@@ -151,6 +151,7 @@ label.secenek input { width: 16px; height: 16px; accent-color: var(--birincil); 
 .kenar nav button.secili { background: var(--birincil); color: #fff; font-weight: 600; }
 .kenar .cikis { border-color: var(--koyu-acik); }
 .kenar .cikis:hover { background: var(--koyu-acik); }
+.kenar .surum { margin-top: 10px; font-size: 12px; color: #a5b4fc; text-align: center; }
 
 .avatar {
     flex: none;

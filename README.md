@@ -6,6 +6,8 @@
 
 **Tarayıcıda dene:** https://yasarmuhammed012-tech.github.io/uyumeslestirme/
 
+**Güncel ara sürüm:** `v0.1.0` ([değişiklikler](CHANGELOG.md))
+
 ## Teknoloji
 
 | Alan | Seçim |
@@ -70,7 +72,9 @@ docs/                       ER diyagramı, mimari ve haftalık notlar
 - [Hafta 5: Güvenlik notu](docs/hafta-5-guvenlik-notu.md)
 - [Hafta 6: Profil ve tercih anketi](docs/hafta-6-profil-anket.md)
 - [Hafta 7: Uyum skorlama ve eşleştirme](docs/hafta-7-uyum-eslestirme.md)
+- [Hafta 8: Ara sürüm, entegrasyon ve demo senaryosu](docs/hafta-8-ara-surum.md)
 - [Uyum skoru hesabı](docs/uyum-skoru.md)
+- [Değişiklik günlüğü](CHANGELOG.md)
 
 ## Haftalık ilerleme
 
@@ -79,3 +83,4 @@ docs/                       ER diyagramı, mimari ve haftalık notlar
 - [x] Hafta 5: Kullanıcı yönetimi ve kimlik doğrulama
 - [x] Hafta 6: Profil ve tercih anketi
 - [x] Hafta 7: Uyum skorlama ve eşleştirme
+- [x] Hafta 8: Ara sürüm `v0.1.0`, uçtan uca entegrasyon testleri, demo senaryosu

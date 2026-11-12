@@ -11,7 +11,9 @@ public sealed class KimlikServisi(KullaniciDeposu kullanicilar, OturumYoneticisi
     public const int AzamiParolaUzunlugu = 128;
     public static readonly TimeSpan KilitSuresi = TimeSpan.FromMinutes(15);
 
-    private const string HataliGiris = "E-posta veya parola hatalı.";
+    // Olmayan hesap, yanlis parola ve kilitli hesap icin tek mesaj: yanit bir hesabin var olup olmadigini ele vermez.
+    private static readonly string HataliGiris =
+        $"E-posta veya parola hatalı. Üst üste {AzamiDeneme} hatalı denemeden sonra hesap {KilitSuresi.TotalMinutes:0} dakika kilitlenir.";
 
     // Olmayan e-postada da ayni sure harcansin diye karsilastirilan sahte kayit.
     private static readonly Lazy<string> SahteHash = new(() => ParolaHasleyici.Hashle(Guid.NewGuid().ToString()));
@@ -57,10 +59,12 @@ public sealed class KimlikServisi(KullaniciDeposu kullanicilar, OturumYoneticisi
             throw new IsKuraliHatasi(HataliGiris);
         }
 
+        // Kilitliyken de parola ozeti hesaplanir; yanit suresi de hesabin durumunu ele vermez.
+        var parolaDogru = ParolaHasleyici.Dogrula(parola, kullanici.ParolaHash);
         if (kullanici.KilitBitis > simdi)
-            throw new IsKuraliHatasi("Çok fazla başarısız deneme yapıldı. Lütfen daha sonra tekrar deneyin.");
+            throw new IsKuraliHatasi(HataliGiris);
 
-        if (!ParolaHasleyici.Dogrula(parola, kullanici.ParolaHash))
+        if (!parolaDogru)
         {
             kullanici.BasarisizGiris++;
             if (kullanici.BasarisizGiris >= AzamiDeneme)
