@@ -65,4 +65,14 @@ public sealed class ProfilServisi(Depo<Profil> profiller, OturumYoneticisi oturu
         profil.Gorunur = girdi.Gorunur;
         profiller.Guncelle(profil);
     }
+
+    // Diger alanlara dokunmadan yalnizca "Arkadas bul listesinde gorun" ayarini degistirir.
+    public void GorunurlukAyarla(bool gorunur)
+    {
+        oturum.GirisGerekli();
+        var profil = profiller.Bul(oturum.KullaniciId)
+            ?? throw new IsKuraliHatasi("Önce profilinizi oluşturun.");
+        profil.Gorunur = gorunur;
+        profiller.Guncelle(profil);
+    }
 }

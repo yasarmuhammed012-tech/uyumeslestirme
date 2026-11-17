@@ -205,4 +205,21 @@ public sealed class AnketVeProfilTestleri : IDisposable
         _oturum.Ac(_ayse, "Kişi 2", Rol.Yonetici);
         Assert.NotNull(_profil.Goruntule(_ali));
     }
+
+    [Fact]
+    public void Gorunurluk_yalnizca_kendi_profilinde_ve_diger_alanlara_dokunmadan_degisir()
+    {
+        Assert.Throws<IsKuraliHatasi>(() => _profil.GorunurlukAyarla(false));
+
+        _profil.Kaydet(new ProfilGirdisi("Muhasebe", "Bingöl", 2005, "merhaba"));
+        _oturum.Ac(_ayse, "Kişi 2", Rol.Ogrenci);
+        _profil.Kaydet(new ProfilGirdisi("İşletme", "Elazığ", 2004, null));
+        _profil.GorunurlukAyarla(false);
+
+        Assert.False(_profil.BenimProfilim()!.Gorunur);
+        _oturum.Ac(_ali, "Kişi 1", Rol.Ogrenci);
+        var ali = _profil.BenimProfilim()!;
+        Assert.True(ali.Gorunur);
+        Assert.Equal(("Muhasebe", "merhaba"), (ali.Bolum, ali.Hakkinda));
+    }
 }
