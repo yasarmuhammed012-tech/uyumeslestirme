@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- JWT anahtari gelistirmede user-secrets'ta, yayinda ortam degiskeninde durur; depoya girmez. -->
+    <UserSecretsId>uyumeslestirme-api-7c1f4a52</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UyumEslestirme.Business\UyumEslestirme.Business.csproj" />
+  </ItemGroup>
+
+</Project>

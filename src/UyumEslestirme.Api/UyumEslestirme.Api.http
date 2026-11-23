@@ -1,0 +1,28 @@
+# Visual Studio / VS Code REST Client ile API'yi elle denemek icin ornek istekler.
+# Once API'yi calistirin: dotnet run --project src/UyumEslestirme.Api
+@api = http://localhost:5158/api
+
+GET {{api}}/saglik
+
+###
+POST {{api}}/kimlik/giris
+Content-Type: application/json
+
+{ "eposta": "ogrenci01@ornek.test", "parola": "Demo1234" }
+
+### Yukaridaki yanittaki token'i buraya yapistirin
+@token = BURAYA_TOKEN
+
+GET {{api}}/adaylar
+Authorization: Bearer {{token}}
+
+###
+GET {{api}}/eslesmeler
+Authorization: Bearer {{token}}
+
+### Token olmadan: 401
+GET {{api}}/adaylar
+
+### Ogrenci token'iyla yonetim ucu: 403
+GET {{api}}/yonetim/kullanicilar
+Authorization: Bearer {{token}}

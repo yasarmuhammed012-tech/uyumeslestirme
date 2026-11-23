@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/UyumEslestirme.Api/UyumEslestirme.Api.csproj" />
     <Project Path="src/UyumEslestirme.Business/UyumEslestirme.Business.csproj" />
     <Project Path="src/UyumEslestirme.Data/UyumEslestirme.Data.csproj" />
     <Project Path="src/UyumEslestirme.Desktop/UyumEslestirme.Desktop.csproj" />
@@ -7,6 +8,7 @@
     <Project Path="src/UyumEslestirme.Web/UyumEslestirme.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/UyumEslestirme.Api.Tests/UyumEslestirme.Api.Tests.csproj" />
     <Project Path="tests/UyumEslestirme.Tests/UyumEslestirme.Tests.csproj" />
   </Folder>
 </Solution>
