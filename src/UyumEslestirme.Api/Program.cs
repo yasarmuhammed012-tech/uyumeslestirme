@@ -150,10 +150,6 @@ app.UseForwardedHeaders();
 if (!app.Environment.IsDevelopment())
     app.UseHsts();
 
-// Web arayuzu (Blazor WebAssembly) ayni sunucudan yayinlanir; tarayici API'ye ayni adresten baglanir.
-app.UseBlazorFrameworkFiles();
-app.UseStaticFiles();
-
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -161,9 +157,43 @@ app.UseRateLimiter();
 app.UseMiddleware<HataKarsilayici>();
 
 Uclar.Esle(app);
-app.MapFallbackToFile("index.html");
+
+// Web arayuzu (Blazor WebAssembly) ayni sunucudan yayinlanir; tarayici API'ye ayni adresten baglanir.
+// MapStaticAssets, "_framework/blazor.webassembly.js" gibi sabit adlari parmak izli dosyalara baglar.
+app.MapStaticAssets();
+app.MapFallback(WebArayuzu.IndexGonder);
 
 app.Run();
+
+// index.html'deki "#[.{fingerprint}]" yer tutucusu yalnizca tek basina yayinda (GitHub Pages) doldurulur.
+// Sunucu sayfayi gonderirken yer tutucuyu kaldirir; sabit ad MapStaticAssets ile cozulur.
+static class WebArayuzu
+{
+    private static string? _sayfa;
+
+    public static async Task IndexGonder(HttpContext http)
+    {
+        if (http.Request.Path.StartsWithSegments("/api"))
+        {
+            http.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
+        if (_sayfa is null)
+        {
+            var dosya = http.RequestServices.GetRequiredService<IWebHostEnvironment>().WebRootFileProvider.GetFileInfo("index.html");
+            if (!dosya.Exists)
+            {
+                http.Response.StatusCode = StatusCodes.Status404NotFound;
+                return;
+            }
+            using var okuyucu = new StreamReader(dosya.CreateReadStream());
+            _sayfa = (await okuyucu.ReadToEndAsync()).Replace("#[.{fingerprint}]", "");
+        }
+        http.Response.ContentType = "text/html; charset=utf-8";
+        http.Response.Headers.CacheControl = "no-cache";
+        await http.Response.WriteAsync(_sayfa);
+    }
+}
 
 // WebApplicationFactory ile entegrasyon testleri icin.
 public partial class Program;
