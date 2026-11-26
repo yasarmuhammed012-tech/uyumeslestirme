@@ -41,8 +41,14 @@ public sealed class OneriTestleri : IDisposable
                 dikkat_konusu = o.DikkatKonusu?.ToString() ?? "Yok",
                 dikkat_notu = o.DikkatNotu ?? "",
             }),
-        });
+        }, Okunur);
     }
+
+    // Turkce karakterler ş gibi kacislanmasin; testler metin uzerinde Replace yapabilsin.
+    private static readonly JsonSerializerOptions Okunur = new()
+    {
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    };
 
     [Fact]
     public async Task Skor_siralamayi_belirler_yapay_zeka_gerekceyi_yazar()
@@ -124,7 +130,10 @@ public sealed class OneriTestleri : IDisposable
     [Fact]
     public async Task Uydurulmus_yuzde_iceren_cikti_reddedilir()
     {
-        _o.YapayZeka.Yanit = _ => GecerliYanit().Replace("Bu kişiyle günlük düzeniniz çok benzer;", "Uyumunuz %97;");
+        var gecerli = GecerliYanit();
+        var bozuk = gecerli.Replace("Bu kişiyle günlük düzeniniz çok benzer;", "Uyumunuz %97;");
+        Assert.NotEqual(gecerli, bozuk);
+        _o.YapayZeka.Yanit = _ => bozuk;
         var sonuc = await _o.Oneri.Oner();
         Assert.Equal(OneriKaynagi.KuralTabanli, sonuc.Kaynak);
     }
