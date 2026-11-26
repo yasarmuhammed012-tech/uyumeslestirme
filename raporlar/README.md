@@ -15,5 +15,5 @@ AI günlüklerinde doğrulamayı kimin yaptığı açıkça yazılıdır. "Açı
 | [6](hafta-06) | Profil ve tercih anketi | `d81bee4`, `83282f2` |
 | [7](hafta-07) | Uyum skorlama ve eşleştirme | `e049f3d`, `a9b5571` |
 | [8](hafta-08) | Ara sürüm `v0.1.0` (vize) ve ekran görüntüleri | `9d65776` |
-| [9](hafta-09) | Bildirim entegrasyonu (ntfy), mesajlaşma, web arayüzünün sunucu ve veritabanına bağlanması | (commit sonrası eklenecek) |
-| [10](hafta-10) | Açıklamalı uyum önerisi (skor + yapay zekâ, çıktı doğrulama), `v0.2.0` | (commit sonrası eklenecek) |
+| [9](hafta-09) | Bildirim entegrasyonu (ntfy), mesajlaşma, web arayüzünün sunucu ve veritabanına bağlanması | `cdd2cdd`, `c3d31e1` |
+| [10](hafta-10) | Açıklamalı uyum önerisi (skor + yapay zekâ, çıktı doğrulama), `v0.2.0` | `cdd2cdd`, `c3d31e1` |
