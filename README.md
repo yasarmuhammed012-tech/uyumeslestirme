@@ -29,13 +29,9 @@ Gereksinim: .NET 10 SDK.
 
 Web arayüzü API sunucusundan yayınlanır. Kayıt olan kullanıcılar sunucudaki SQLite veritabanında (`veri/uyum.db`, yol `ConnectionStrings:Uyum` ayarında) kalıcı olarak saklanır.
 
-İlk seferde JWT imza anahtarını tanımlayın (koda yazılmaz):
+**Canlı adres:** https://uyumeslestirme.runasp.net (MonsterASP.NET ücretsiz barındırma; panelden GitHub'daki `main` dalı derlenip yayınlanır).
 
-```powershell
-dotnet user-secrets set "Jwt:Anahtar" "<en az 32 karakterlik rastgele bir değer>" --project src/UyumEslestirme.Api
-```
-
-Sonra:
+Yerelde çalıştırmak için:
 
 ```powershell
 dotnet run --project src/UyumEslestirme.Api
@@ -47,6 +43,7 @@ Tarayıcıda http://localhost:5158 adresini açın, **Kayıt olun** ile hesap ol
 
 | Ayar | Ne işe yarar | Yoksa |
 | --- | --- | --- |
+| `Jwt__Anahtar` | Oturum token'larının imza anahtarı | İlk açılışta rastgele üretilir ve veritabanının yanında (`veri/jwt-anahtari.txt`) saklanır |
 | `ANTHROPIC_API_KEY` | Önerilenler sayfasında gerekçeyi Claude yazar | Gerekçeler kural tabanlı yazılır |
 | `Bildirim__Anahtar` | ntfy erişim anahtarı | Herkese açık ntfy konusuna anahtarsız gönderilir |
 

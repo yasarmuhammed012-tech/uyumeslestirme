@@ -20,12 +20,19 @@ var ayar = builder.Configuration;
 // ---- Veritabani: ortak SQLite dosyasi, yolu ayardan gelir (ConnectionStrings__Uyum) ----
 var baglanti = ayar.GetConnectionString("Uyum")
     ?? throw new InvalidOperationException("ConnectionStrings:Uyum ayarı yok.");
-VeritabaniHazirlayici.KlasoruOlustur(baglanti);
+baglanti = VeritabaniHazirlayici.Hazirla(baglanti, builder.Environment.ContentRootPath);
 builder.Services.AddDbContext<UygulamaDbContext>(o => o.UseSqlite(baglanti));
 builder.Services.AddSingleton(TimeProvider.System);
 
 // ---- Kimlik dogrulama: JWT ----
 var jwt = ayar.GetSection(JwtAyarlari.Bolum).Get<JwtAyarlari>() ?? new JwtAyarlari();
+if (string.IsNullOrEmpty(jwt.Anahtar))
+{
+    // Anahtar ayarda yoksa sunucu ilk acilista rastgele uretir ve veritabaninin yaninda saklar
+    // (depoya ve koda girmez; yeniden baslatmada ayni anahtar kullanilir, oturumlar gecerli kalir).
+    jwt.Anahtar = JwtAyarlari.DosyadanVeyaYeni(Path.Combine(
+        Path.GetDirectoryName(new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(baglanti).DataSource)!, "jwt-anahtari.txt"));
+}
 var anahtar = jwt.GuvenlikAnahtari();
 builder.Services.AddSingleton(jwt);
 builder.Services.AddSingleton<TokenServisi>();

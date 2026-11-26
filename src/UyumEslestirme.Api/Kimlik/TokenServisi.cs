@@ -18,6 +18,20 @@ public sealed class JwtAyarlari
     public string Yayinci { get; set; } = "UyumEslestirme.Api";
     public string Hedef { get; set; } = "UyumEslestirme.Web";
 
+    // Dosya varsa icindeki anahtari okur; yoksa 48 baytlik rastgele anahtar uretip dosyaya yazar.
+    public static string DosyadanVeyaYeni(string dosya)
+    {
+        if (File.Exists(dosya))
+        {
+            var mevcut = File.ReadAllText(dosya).Trim();
+            if (Encoding.UTF8.GetByteCount(mevcut) >= AsgariAnahtarUzunlugu)
+                return mevcut;
+        }
+        var yeni = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(48));
+        File.WriteAllText(dosya, yeni);
+        return yeni;
+    }
+
     public SymmetricSecurityKey GuvenlikAnahtari()
     {
         if (Encoding.UTF8.GetByteCount(Anahtar) < AsgariAnahtarUzunlugu)

@@ -118,9 +118,10 @@ Hepsi JWT ister. Kullanıcı kimliği yine yalnızca token'dan okunur. Örnek is
 Önceki haftalarda web sürümü yalnızca tarayıcı belleğinde çalışan bir demoydu. Artık aynı web arayüzü API sunucusundan yayınlanıyor:
 
 ```powershell
-dotnet user-secrets set "Jwt:Anahtar" "<en az 32 karakterlik rastgele değer>" --project src/UyumEslestirme.Api
 dotnet run --project src/UyumEslestirme.Api
 ```
+
+JWT imza anahtarı ayarda yoksa sunucu ilk açılışta rastgele üretip `veri/jwt-anahtari.txt` dosyasında saklar; depoya girmez. Canlı sürüm: https://uyumeslestirme.runasp.net
 
 Tarayıcıda http://localhost:5158 açılınca:
 

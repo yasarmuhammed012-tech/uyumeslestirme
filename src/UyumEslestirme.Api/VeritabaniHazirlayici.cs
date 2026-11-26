@@ -12,12 +12,17 @@ public static class VeritabaniHazirlayici
 {
     public const string GelistirmeDemoParolasi = "Demo1234";
 
-    public static void KlasoruOlustur(string baglantiDizesi)
+    // Goreli yol (veri/uyum.db) uygulama klasorune gore cozulur: IIS gibi barindirma ortamlarinda
+    // calisma dizini uygulama klasoru olmayabilir. Klasor yoksa olusturulur.
+    public static string Hazirla(string baglantiDizesi, string uygulamaKlasoru)
     {
-        var dosya = new SqliteConnectionStringBuilder(baglantiDizesi).DataSource;
-        var klasor = Path.GetDirectoryName(Path.GetFullPath(dosya));
+        var b = new SqliteConnectionStringBuilder(baglantiDizesi);
+        if (b.DataSource != ":memory:" && !Path.IsPathRooted(b.DataSource))
+            b.DataSource = Path.Combine(uygulamaKlasoru, b.DataSource);
+        var klasor = Path.GetDirectoryName(Path.GetFullPath(b.DataSource));
         if (!string.IsNullOrEmpty(klasor))
             Directory.CreateDirectory(klasor);
+        return b.ToString();
     }
 
     public static void Hazirla(IServiceProvider servisler)
