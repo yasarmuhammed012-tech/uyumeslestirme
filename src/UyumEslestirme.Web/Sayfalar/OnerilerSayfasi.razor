@@ -1,0 +1,81 @@
+@inherits SayfaTabani
+
+<SayfaBasligi Baslik="Sana önerilenler" Aciklama="Uyum skoruna göre henüz istek göndermediğin en uygun 3 kişi ve neden uygun olduklarının açıklaması." />
+
+<div class="filtre">
+    <button class="birincil" disabled="@Mesgul" @onclick="Getir">@(Mesgul ? "Öneriler hazırlanıyor…" : _sonuc is null ? "Önerileri getir" : "Yeniden oluştur")</button>
+    @if (_sonuc is not null)
+    {
+        <span class="etiket @(_sonuc.Kaynak == OneriKaynagi.YapayZeka ? "iyi" : "notr")">
+            Gerekçeyi yazan: @(_sonuc.Kaynak == OneriKaynagi.YapayZeka ? "Yapay zekâ (doğrulandı)" : "Kural tabanlı şablon")
+        </span>
+    }
+</div>
+
+<Uyari Hata="@Hata" Bilgi="@Bilgi" />
+
+@if (_sonuc?.Aciklama is { } aciklama)
+{
+    <p class="soluk kucuk">@aciklama</p>
+}
+
+@if (_sonuc is not null)
+{
+    @foreach (var o in _sonuc.Oneriler)
+    {
+        <KisiKarti Ad="@o.AdSoyad" Satirlar="@([$"{o.Bolum} · {o.Sehir}"])" Uyum="o.UyumYuzdesi">
+            <Ek>
+                <p class="gerekce">@o.Gerekce</p>
+                <p class="etiketler">
+                    @foreach (var k in o.GucluYonler)
+                    {
+                        <span class="etiket iyi">✓ @Arayuz.KategoriAdi(k)</span>
+                    }
+                    @if (o.DikkatKonusu is { } d)
+                    {
+                        <span class="etiket fark">Konuşun: @Arayuz.KategoriAdi(d)</span>
+                    }
+                </p>
+                @if (o.DikkatNotu is not null)
+                {
+                    <p class="soluk kucuk">@o.DikkatNotu</p>
+                }
+            </Ek>
+            <Eylemler>
+                @if (_gonderilen.Contains(o.KullaniciId))
+                {
+                    <span class="durum bekliyor">İstek gönderildi</span>
+                }
+                else
+                {
+                    <button class="birincil" disabled="@Mesgul" @onclick="() => IstekGonder(o)">İstek gönder</button>
+                }
+            </Eylemler>
+        </KisiKarti>
+    }
+    <p class="soluk kucuk seffaflik">
+        Kişiler uyum skoruna göre seçilir; yapay zekâ sıralamayı değiştirmez, yalnızca gerekçeyi yazar.
+        Yapay zekâya adın, e-postan veya "hakkında" yazın gönderilmez; yalnızca kategori bazında uyum değerleri gider.
+        Yanıt, gerçek değerlerle karşılaştırılarak doğrulanır; tutmazsa kural tabanlı gerekçe gösterilir.
+    </p>
+}
+
+@code {
+    private OneriSonucu? _sonuc;
+    private readonly HashSet<int> _gonderilen = [];
+
+    private Task Getir() => Dene(async () =>
+    {
+        _gonderilen.Clear();
+        _sonuc = await U.Oneriler();
+    });
+
+    private async Task IstekGonder(UyumOnerisi o)
+    {
+        if (await Dene(() => U.IstekGonder(o.KullaniciId)))
+        {
+            _gonderilen.Add(o.KullaniciId);
+            Bilgi = $"{o.AdSoyad} kişisine istek gönderildi.";
+        }
+    }
+}

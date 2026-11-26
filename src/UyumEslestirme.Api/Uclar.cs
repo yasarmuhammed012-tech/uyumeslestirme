@@ -10,6 +10,7 @@ namespace UyumEslestirme.Api;
 public static class Uclar
 {
     public const string GirisSiniri = "giris";
+    public const string OneriSiniri = "oneri";
 
     public static void Esle(WebApplication app)
     {
@@ -101,6 +102,46 @@ public static class Uclar
             s.Eslesme.GeriCek(id);
             return Results.NoContent();
         });
+
+        // ---- Hafta 9: bildirimler ----
+        var bildirim = oturum.MapGroup("/bildirimler");
+
+        bildirim.MapGet("", (Servisler s) => s.Bildirim.Listele());
+
+        bildirim.MapGet("/okunmamis", (Servisler s) => new { sayi = s.Bildirim.OkunmamisSayisi() });
+
+        bildirim.MapPost("/okundu", (Servisler s) =>
+        {
+            s.Bildirim.TumunuOkundu();
+            return Results.NoContent();
+        });
+
+        bildirim.MapGet("/tercihler", (Servisler s) => s.Bildirim.Tercihlerim());
+
+        bildirim.MapPut("/tercihler", (BildirimTercihleri t, Servisler s) =>
+        {
+            s.Bildirim.TercihleriKaydet(t);
+            return Results.NoContent();
+        });
+
+        bildirim.MapPost("/deneme", (Servisler s) =>
+        {
+            s.Bildirim.DenemeGonder();
+            return Results.Accepted();
+        }).RequireRateLimiting(OneriSiniri);
+
+        // ---- Mesajlar (yalnizca eslesmis kisiler arasinda) ----
+        oturum.MapGet("/mesajlar/{kisiId:int}", (int kisiId, Servisler s) => s.Mesaj.Konusma(kisiId));
+
+        oturum.MapPost("/mesajlar", (MesajGonderIstegi i, Servisler s) =>
+        {
+            s.Mesaj.Gonder(i.KisiId, i.Icerik);
+            return Results.NoContent();
+        });
+
+        // ---- Hafta 10: aciklamali uyum onerisi ----
+        oturum.MapGet("/oneriler", (Servisler s, CancellationToken iptal) => s.Oneri.Oner(iptal))
+            .RequireRateLimiting(OneriSiniri);
 
         // ---- Yalnizca yonetici ----
         // Rol hem burada (403) hem YonetimServisi icinde denetlenir.

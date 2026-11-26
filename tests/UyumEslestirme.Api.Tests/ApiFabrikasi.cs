@@ -4,6 +4,8 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Data.Sqlite;
 using UyumEslestirme.Business;
 
@@ -30,7 +32,13 @@ public sealed class ApiFabrikasi(string? dbDosyasi = null) : WebApplicationFacto
         builder.UseSetting("Tohum:DemoVerisi", "false");
         builder.UseSetting("Yonetici:Eposta", YoneticiEposta);
         builder.UseSetting("Yonetici:Parola", YoneticiParola);
+        builder.UseSetting("HizSiniri:DakikadaOneri", "100000");
+        builder.UseSetting("ANTHROPIC_API_KEY", "");
+        builder.ConfigureTestServices(s => SahteServisler?.Invoke(s));
     }
+
+    // Harici servisler (ntfy, Claude) yerine sahteleri koymak icin.
+    public Action<IServiceCollection>? SahteServisler { get; init; }
 
     public Istemci Istemci() => new(CreateClient());
 

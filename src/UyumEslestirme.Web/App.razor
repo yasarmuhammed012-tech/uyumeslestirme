@@ -1,8 +1,8 @@
 ﻿@implements IDisposable
-@inject Servisler S
+@inject IUygulama U
 
 <CascadingValue Value="this" IsFixed="true">
-    @if (!S.Oturum.Acik)
+    @if (!U.Acik)
     {
         <div class="giris-zemin">
             <div class="giris-kutu">
@@ -27,7 +27,17 @@
                     }
                 </section>
             </div>
-            <p class="demo-notu">@UygulamaSurumu.Metin · Web demosu: veriler yalnızca bu tarayıcı sekmesinde tutulur, sayfa yenilenince demo verilere döner.</p>
+            <p class="demo-notu">
+                @UygulamaSurumu.Metin ·
+                @if (U.GercekVeritabani)
+                {
+                    <text>Sunucu sürümü: hesaplar ve veriler sunucudaki veritabanında kalıcı olarak saklanır.</text>
+                }
+                else
+                {
+                    <text>Web demosu: veriler yalnızca bu tarayıcı sekmesinde tutulur, sayfa yenilenince demo verilere döner.</text>
+                }
+            </p>
         </div>
     }
     else
@@ -36,28 +46,36 @@
             <aside class="kenar">
                 <div class="marka"><span class="logo kucuk">⌂</span> Uyum Eşleştirme</div>
                 <div class="kullanici">
-                    <div class="avatar">@Arayuz.BasHarfler(S.Oturum.AdSoyad)</div>
+                    <div class="avatar">@Arayuz.BasHarfler(U.AdSoyad)</div>
                     <div>
-                        <b>@S.Oturum.AdSoyad</b>
-                        <span>@Arayuz.RolAdi(S.Oturum.Rol)</span>
+                        <b>@U.AdSoyad</b>
+                        <span>@Arayuz.RolAdi(U.Rol)</span>
                     </div>
                 </div>
                 <nav>
                     @foreach (var (ad, sayfa) in Menu())
                     {
-                        <button class="@(sayfa == _sayfa ? "secili" : null)" @onclick="() => _sayfa = sayfa">@ad</button>
+                        <button class="@(sayfa == _sayfa ? "secili" : null)" @onclick="() => SayfaAc(sayfa)">
+                            @ad
+                            @if (sayfa == Sayfa.Bildirimler && _okunmamis > 0)
+                            {
+                                <span class="rozet" aria-label="okunmamış bildirim">@_okunmamis</span>
+                            }
+                        </button>
                     }
                 </nav>
                 <button class="cikis" @onclick="CikisYap">Çıkış yap</button>
-                <span class="surum">@UygulamaSurumu.Metin</span>
+                <span class="surum">@UygulamaSurumu.Metin · @(U.GercekVeritabani ? "sunucu" : "demo")</span>
             </aside>
             <main class="icerik">
                 @switch (_sayfa)
                 {
                     case Sayfa.Profil: <ProfilSayfasi />; break;
                     case Sayfa.Anket: <AnketSayfasi />; break;
+                    case Sayfa.Oneriler: <OnerilerSayfasi />; break;
                     case Sayfa.Adaylar: <AdaylarSayfasi />; break;
                     case Sayfa.Eslesmeler: <EslesmelerSayfasi />; break;
+                    case Sayfa.Bildirimler: <BildirimlerSayfasi />; break;
                     case Sayfa.Yonetim: <YonetimSayfasi />; break;
                 }
             </main>
@@ -66,49 +84,77 @@
 </CascadingValue>
 
 @code {
-    public enum Sayfa { Profil, Anket, Adaylar, Eslesmeler, Yonetim }
+    public enum Sayfa { Profil, Anket, Oneriler, Adaylar, Eslesmeler, Bildirimler, Yonetim }
 
     private bool _kayit;
     private string? _girisMesaji;
     private Sayfa _sayfa = Sayfa.Profil;
+    private int _okunmamis;
     private Timer? _zamanlayici;
 
     protected override void OnInitialized() =>
-        _zamanlayici = new Timer(_ => InvokeAsync(OturumuDenetle), null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+        _zamanlayici = new Timer(_ => InvokeAsync(Denetle), null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
 
     // Rol kontrolu is katmanindadir; menu yalnizca kullaniciya uygun sayfalari gosterir.
     private IEnumerable<(string, Sayfa)> Menu()
     {
         yield return ("Profil", Sayfa.Profil);
         yield return ("Tercih anketi", Sayfa.Anket);
-        if (S.Oturum.Rol == Rol.Ogrenci)
+        if (U.Rol == Rol.Ogrenci)
         {
+            yield return ("Önerilenler", Sayfa.Oneriler);
             yield return ("Arkadaş bul", Sayfa.Adaylar);
             yield return ("Eşleşmelerim", Sayfa.Eslesmeler);
         }
-        else
-        {
+        yield return ("Bildirimler", Sayfa.Bildirimler);
+        if (U.Rol == Rol.Yonetici)
             yield return ("Yönetim", Sayfa.Yonetim);
+    }
+
+    private async Task SayfaAc(Sayfa sayfa)
+    {
+        _sayfa = sayfa;
+        await BildirimSayisiniYenile();
+    }
+
+    public async Task BildirimSayisiniYenile()
+    {
+        if (!U.Acik)
+            return;
+        try
+        {
+            _okunmamis = await U.OkunmamisBildirim();
+            StateHasChanged();
+        }
+        catch (Exception h) when (h is IsKuraliHatasi or YetkisizErisimHatasi)
+        {
+            // Rozet yalnizca bilgi amaclidir; hata sayfa akisini bozmaz.
         }
     }
 
-    public void OturumBitti(string mesaj)
+    public async Task OturumBitti(string mesaj)
     {
-        S.Kimlik.CikisYap();
+        await U.CikisYap();
         _girisMesaji = mesaj;
         StateHasChanged();
     }
 
-    private void OturumuDenetle()
+    // 30 saniyede bir: oturum suresi doldu mu, yeni bildirim var mi?
+    private async Task Denetle()
     {
-        if (S.Oturum.KullaniciId != 0 && !S.Oturum.Acik)
-            OturumBitti("Oturum süreniz doldu. Lütfen tekrar giriş yapın.");
+        if (!U.Acik && U.AdSoyad != "")
+        {
+            await OturumBitti("Oturum süreniz doldu. Lütfen tekrar giriş yapın.");
+            return;
+        }
+        await BildirimSayisiniYenile();
     }
 
-    private void GirisYapildi()
+    private async Task GirisYapildi()
     {
         _girisMesaji = null;
         _sayfa = Sayfa.Profil;
+        await BildirimSayisiniYenile();
     }
 
     private void KayitAc()
@@ -123,10 +169,11 @@
         _girisMesaji = "Kayıt tamamlandı. Şimdi giriş yapabilirsiniz.";
     }
 
-    private void CikisYap()
+    private async Task CikisYap()
     {
-        S.Kimlik.CikisYap();
+        await U.CikisYap();
         _girisMesaji = null;
+        _okunmamis = 0;
     }
 
     public void Dispose() => _zamanlayici?.Dispose();

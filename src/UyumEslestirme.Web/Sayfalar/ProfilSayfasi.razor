@@ -44,9 +44,9 @@
     private bool _gorunur = true;
     private List<KategoriOzeti> _ozet = [];
 
-    protected override void OnInitialized() => Dene(() =>
+    protected override Task OnInitializedAsync() => Dene(async () =>
     {
-        var profil = S.Profil.BenimProfilim();
+        var profil = await U.Profil();
         if (profil is not null)
         {
             _bolum = profil.Bolum;
@@ -55,12 +55,12 @@
             _hakkinda = profil.Hakkinda;
             _gorunur = profil.Gorunur;
         }
-        _ozet = S.Anket.TercihOzeti();
+        _ozet = await U.TercihOzeti();
     });
 
-    private void Kaydet()
+    private async Task Kaydet()
     {
-        if (Dene(() => S.Profil.Kaydet(new ProfilGirdisi(_bolum, _sehir, _dogumYili ?? 0, _hakkinda, _gorunur))))
+        if (await Dene(() => U.ProfilKaydet(new ProfilGirdisi(_bolum, _sehir, _dogumYili ?? 0, _hakkinda, _gorunur))))
             Bilgi = "✓ Profil kaydedildi.";
     }
 }

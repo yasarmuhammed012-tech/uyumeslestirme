@@ -23,18 +23,18 @@
 
 <div class="alt-cubuk">
     <Uyari Hata="@Hata" Bilgi="@Bilgi" />
-    <button class="birincil" @onclick="Kaydet">Anketi kaydet</button>
+    <button class="birincil" disabled="@Mesgul" @onclick="Kaydet">Anketi kaydet</button>
 </div>
 
 @code {
-    private List<AnketSorusu> _sorular = [];
+    private List<SoruBilgisi> _sorular = [];
     private readonly Dictionary<int, int> _cevap = [];
     private readonly Dictionary<int, int> _onem = [];
 
-    protected override void OnInitialized() => Dene(() =>
+    protected override Task OnInitializedAsync() => Dene(async () =>
     {
-        _sorular = S.Anket.Sorular();
-        var cevaplar = S.Anket.BenimCevaplarim().ToDictionary(c => c.SoruId);
+        _sorular = await U.Sorular();
+        var cevaplar = (await U.Cevaplarim()).ToDictionary(c => c.SoruId);
         foreach (var soru in _sorular)
         {
             cevaplar.TryGetValue(soru.Id, out var c);
@@ -43,7 +43,7 @@
         }
     });
 
-    private void Kaydet()
+    private async Task Kaydet()
     {
         if (_sorular.Any(s => _cevap[s.Id] == 0 || _onem[s.Id] == 0))
         {
@@ -53,7 +53,7 @@
         }
 
         var girdiler = _sorular.Select(s => new CevapGirdisi(s.Id, _cevap[s.Id], _onem[s.Id])).ToList();
-        if (Dene(() => S.Anket.CevaplariKaydet(girdiler)))
+        if (await Dene(() => U.CevaplariKaydet(girdiler)))
             Bilgi = "✓ Anket kaydedildi. Uyum skorların yeniden hesaplanacak.";
     }
 }

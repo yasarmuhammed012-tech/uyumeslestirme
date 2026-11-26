@@ -24,7 +24,9 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Testler
-        run: dotnet test tests/UyumEslestirme.Tests
+        run: |
+          dotnet test tests/UyumEslestirme.Tests
+          dotnet test tests/UyumEslestirme.Api.Tests
       - name: Web surumunu yayinla
         run: dotnet publish src/UyumEslestirme.Web -c Release -o cikti
       - name: Pages dosyalari

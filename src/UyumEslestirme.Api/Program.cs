@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Anthropic;
 using UyumEslestirme.Api;
+using UyumEslestirme.Api.Bildirim;
 using UyumEslestirme.Api.Kimlik;
+using UyumEslestirme.Api.YapayZeka;
 using UyumEslestirme.Business;
 using UyumEslestirme.Data;
 using UyumEslestirme.Domain;
@@ -55,12 +58,39 @@ builder.Services
     });
 builder.Services.AddAuthorization();
 
+// ---- Hafta 9: telefon bildirimi (ntfy REST API) ----
+var bildirimAyar = ayar.GetSection(BildirimAyarlari.Bolum).Get<BildirimAyarlari>() ?? new BildirimAyarlari();
+builder.Services.AddSingleton(bildirimAyar);
+builder.Services.AddSingleton<BildirimKuyrugu>();
+builder.Services.AddHttpClient<IHariciBildirimKanali, NtfyKanali>(http =>
+{
+    http.BaseAddress = new Uri(bildirimAyar.Adres);
+    // Deneme basina zaman asimi NtfyKanali icinde yonetilir; burasi yalnizca ust sinirdir.
+    http.Timeout = TimeSpan.FromSeconds(bildirimAyar.ZamanAsimiSaniye * bildirimAyar.AzamiDeneme + 30);
+});
+builder.Services.AddHostedService<BildirimGondericisi>();
+
+// ---- Hafta 10: aciklamali oneri icin Claude. Anahtar yoksa oneriler kural tabanli yazilir. ----
+var yzAyar = ayar.GetSection(YapayZekaAyarlari.Bolum).Get<YapayZekaAyarlari>() ?? new YapayZekaAyarlari();
+if (string.IsNullOrEmpty(yzAyar.Anahtar))
+    yzAyar.Anahtar = ayar["ANTHROPIC_API_KEY"] ?? "";
+builder.Services.AddSingleton(yzAyar);
+if (!string.IsNullOrEmpty(yzAyar.Anahtar))
+{
+    builder.Services.AddSingleton(new AnthropicClient { ApiKey = yzAyar.Anahtar, Timeout = OneriServisi.VarsayilanZamanAsimi });
+    builder.Services.AddSingleton<IYapayZekaIstemcisi, ClaudeIstemcisi>();
+}
+
 // Her istek icin yeni Servisler: oturum, dogrulanmis token'daki kullanici kimligiyle acilir.
 // Istek govdesinde gelen bir kimlik hicbir yerde kullanilmaz.
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped(sp =>
 {
-    var servisler = new Servisler(sp.GetRequiredService<UygulamaDbContext>(), sp.GetRequiredService<TimeProvider>());
+    var servisler = new Servisler(
+        sp.GetRequiredService<UygulamaDbContext>(),
+        sp.GetRequiredService<TimeProvider>(),
+        sp.GetRequiredService<BildirimKuyrugu>(),
+        sp.GetService<IYapayZekaIstemcisi>());
     var kullanici = sp.GetRequiredService<IHttpContextAccessor>().HttpContext?.User;
     if (kullanici is not null && Talepler.Oku(kullanici) is { } k)
         servisler.Oturum.Ac(k.Id, k.AdSoyad, k.Rol);
@@ -91,6 +121,10 @@ builder.Services.AddRateLimiter(o =>
     o.AddPolicy(Uclar.GirisSiniri, http => RateLimitPartition.GetFixedWindowLimiter(
         http.Connection.RemoteIpAddress?.ToString() ?? "bilinmiyor",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = dakikadaGiris, Window = TimeSpan.FromMinutes(1) }));
+    // Yapay zeka cagrisi ucretli ve yavas: kullanici basina dakikada sinirli.
+    o.AddPolicy(Uclar.OneriSiniri, http => RateLimitPartition.GetFixedWindowLimiter(
+        http.User.FindFirst(Talepler.KullaniciId)?.Value ?? http.Connection.RemoteIpAddress?.ToString() ?? "bilinmiyor",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = ayar.GetValue("HizSiniri:DakikadaOneri", 5), Window = TimeSpan.FromMinutes(1) }));
 });
 
 // Barindirma ortaminda istek bir vekil sunucudan gelir; istemci IP'si son X-Forwarded-For degeridir.
@@ -108,6 +142,11 @@ VeritabaniHazirlayici.Hazirla(app.Services);
 app.UseForwardedHeaders();
 if (!app.Environment.IsDevelopment())
     app.UseHsts();
+
+// Web arayuzu (Blazor WebAssembly) ayni sunucudan yayinlanir; tarayici API'ye ayni adresten baglanir.
+app.UseBlazorFrameworkFiles();
+app.UseStaticFiles();
+
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -115,6 +154,7 @@ app.UseRateLimiter();
 app.UseMiddleware<HataKarsilayici>();
 
 Uclar.Esle(app);
+app.MapFallbackToFile("index.html");
 
 app.Run();
 

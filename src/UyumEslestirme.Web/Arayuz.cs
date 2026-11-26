@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using UyumEslestirme.Business;
 using UyumEslestirme.Domain;
+using UyumEslestirme.Web.Istemci;
 
 namespace UyumEslestirme.Web;
 
@@ -15,15 +16,7 @@ public static class Demo
 
 public static class Arayuz
 {
-    public static string KategoriAdi(SoruKategorisi kategori) => kategori switch
-    {
-        SoruKategorisi.UykuDuzeni => "Gece düzeni",
-        SoruKategorisi.Temizlik => "Düzen ve temizlik",
-        SoruKategorisi.Sosyallik => "Sosyallik",
-        SoruKategorisi.Gurultu => "Sessizlik isteği",
-        SoruKategorisi.Ders => "Evde ders çalışma",
-        _ => kategori.ToString(),
-    };
+    public static string KategoriAdi(SoruKategorisi kategori) => KategoriAdlari.Ad(kategori);
 
     public static string RolAdi(Rol rol) => rol == Rol.Yonetici ? "Yönetici" : "Öğrenci";
 
@@ -45,22 +38,24 @@ public static class Arayuz
     public static string Tarih(DateTime utc) => utc.ToLocalTime().ToString("dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
 }
 
-// Sayfalarin ortak tabani: is katmani hatalarini ekranda gosterilecek mesaja cevirir.
+// Sayfalarin ortak tabani: is katmani (veya API) hatalarini ekranda gosterilecek mesaja cevirir.
 public abstract class SayfaTabani : ComponentBase
 {
-    [Inject] protected Servisler S { get; set; } = default!;
+    [Inject] protected IUygulama U { get; set; } = default!;
     [CascadingParameter] protected App Kabuk { get; set; } = default!;
 
     protected string? Hata { get; set; }
     protected string? Bilgi { get; set; }
+    protected bool Mesgul { get; private set; }
 
-    protected bool Dene(Action islem)
+    protected async Task<bool> Dene(Func<Task> islem)
     {
         Hata = null;
         Bilgi = null;
+        Mesgul = true;
         try
         {
-            islem();
+            await islem();
             return true;
         }
         catch (IsKuraliHatasi h)
@@ -70,8 +65,12 @@ public abstract class SayfaTabani : ComponentBase
         catch (YetkisizErisimHatasi h)
         {
             Hata = h.Message;
-            if (!S.Oturum.Acik)
-                Kabuk.OturumBitti(h.Message);
+            if (!U.Acik)
+                await Kabuk.OturumBitti(h.Message);
+        }
+        finally
+        {
+            Mesgul = false;
         }
         return false;
     }

@@ -1,6 +1,6 @@
 @inherits SayfaTabani
 
-<SayfaBasligi Baslik="Eşleşmelerim" Aciklama="Gelen istekleri yanıtla. İki taraf da kabul edince iletişim bilgileri görünür." />
+<SayfaBasligi Baslik="Eşleşmelerim" Aciklama="Gelen istekleri yanıtla. İki taraf da kabul edince iletişim bilgileri görünür ve mesajlaşabilirsiniz." />
 
 <Uyari Hata="@Hata" Bilgi="@Bilgi" />
 
@@ -11,8 +11,8 @@
     {
         <KisiKarti Ad="@e.AdSoyad" Satirlar="@Satirlar(e)" Uyum="e.UyumYuzdesi">
             <Eylemler>
-                <button class="birincil" @onclick="() => Yanitla(e, true)">Kabul et</button>
-                <button class="ikincil" @onclick="() => Yanitla(e, false)">Reddet</button>
+                <button class="birincil" disabled="@Mesgul" @onclick="() => Yanitla(e, true)">Kabul et</button>
+                <button class="ikincil" disabled="@Mesgul" @onclick="() => Yanitla(e, false)">Reddet</button>
             </Eylemler>
         </KisiKarti>
     }
@@ -33,7 +33,7 @@
                 else
                 {
                     <span class="durum bekliyor">Yanıt bekleniyor</span>
-                    <button class="ikincil" @onclick="() => GeriCek(e)">Geri çek</button>
+                    <button class="ikincil" disabled="@Mesgul" @onclick="() => GeriCek(e)">Geri çek</button>
                 }
             </Eylemler>
         </KisiKarti>
@@ -47,7 +47,16 @@
     @foreach (var e in _listeler.Eslesmeler)
     {
         <KisiKarti Ad="@e.AdSoyad" Satirlar="@([.. Satirlar(e), $"İletişim: {e.Eposta}"])" Uyum="e.UyumYuzdesi">
-            <Eylemler><span class="durum basari">✓ Eşleştiniz</span></Eylemler>
+            <Ek>
+                @if (_acikKonusma == e.KisiId)
+                {
+                    <MesajPaneli KisiId="e.KisiId" KisiAdi="@e.AdSoyad" />
+                }
+            </Ek>
+            <Eylemler>
+                <span class="durum basari">✓ Eşleştiniz</span>
+                <button class="ikincil" @onclick="() => KonusmaAc(e.KisiId)">@(_acikKonusma == e.KisiId ? "Mesajları kapat" : "Mesajlar")</button>
+            </Eylemler>
         </KisiKarti>
     }
     @if (_listeler.Eslesmeler.Count == 0)
@@ -58,23 +67,26 @@
 
 @code {
     private EslesmeListeleri? _listeler;
+    private int? _acikKonusma;
 
-    protected override void OnInitialized() => Dene(Yukle);
+    protected override Task OnInitializedAsync() => Dene(Yukle);
 
-    private void Yukle() => _listeler = S.Eslesme.Listele();
+    private async Task Yukle() => _listeler = await U.Eslesmeler();
 
     private static List<string> Satirlar(EslesmeOzeti e) =>
         [$"{e.Bolum} · {e.Sehir}", $"Tarih: {Arayuz.Tarih(e.Tarih)}"];
 
-    private void Yanitla(EslesmeOzeti e, bool kabul)
+    private void KonusmaAc(int kisiId) => _acikKonusma = _acikKonusma == kisiId ? null : kisiId;
+
+    private async Task Yanitla(EslesmeOzeti e, bool kabul)
     {
-        if (Dene(() => { S.Eslesme.Yanitla(e.EslesmeId, kabul); Yukle(); }))
-            Bilgi = kabul ? $"{e.AdSoyad} ile eşleştiniz." : $"{e.AdSoyad} kişisinin isteği reddedildi.";
+        if (await Dene(async () => { await U.Yanitla(e.EslesmeId, kabul); await Yukle(); }))
+            Bilgi = kabul ? $"{e.AdSoyad} ile eşleştiniz. Artık mesajlaşabilirsiniz." : $"{e.AdSoyad} kişisinin isteği reddedildi.";
     }
 
-    private void GeriCek(EslesmeOzeti e)
+    private async Task GeriCek(EslesmeOzeti e)
     {
-        if (Dene(() => { S.Eslesme.GeriCek(e.EslesmeId); Yukle(); }))
+        if (await Dene(async () => { await U.GeriCek(e.EslesmeId); await Yukle(); }))
             Bilgi = $"{e.AdSoyad} kişisine gönderilen istek geri çekildi.";
     }
 }

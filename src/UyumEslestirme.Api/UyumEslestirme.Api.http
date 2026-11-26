@@ -26,3 +26,41 @@ GET {{api}}/adaylar
 ### Ogrenci token'iyla yonetim ucu: 403
 GET {{api}}/yonetim/kullanicilar
 Authorization: Bearer {{token}}
+
+### ---- Hafta 9: bildirimler ----
+GET {{api}}/bildirimler
+Authorization: Bearer {{token}}
+
+###
+GET {{api}}/bildirimler/okunmamis
+Authorization: Bearer {{token}}
+
+### Telefon konusu: ntfy uygulamasinda ayni konuya abone olun
+PUT {{api}}/bildirimler/tercihler
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "eslesmeBildirimi": true, "mesajBildirimi": true, "telefonKonusu": "uyum-ornek-konu-7f3k29" }
+
+### Telefona deneme bildirimi (202; sonucu GET /bildirimler'de HariciDurum alaninda)
+POST {{api}}/bildirimler/deneme
+Authorization: Bearer {{token}}
+
+###
+POST {{api}}/bildirimler/okundu
+Authorization: Bearer {{token}}
+
+### ---- Mesajlar (yalnizca eslesmis kisiyle; ogrenci01 ile ogrenci03 eslesmis) ----
+GET {{api}}/mesajlar/4
+Authorization: Bearer {{token}}
+
+###
+POST {{api}}/mesajlar
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "kisiId": 4, "icerik": "Merhaba, ev için konuşalım mı?" }
+
+### ---- Hafta 10: aciklamali uyum onerisi ----
+GET {{api}}/oneriler
+Authorization: Bearer {{token}}

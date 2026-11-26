@@ -24,6 +24,7 @@ public sealed class EslesmeServisi(
     EslesmeDeposu eslesmeler,
     KullaniciDeposu kullanicilar,
     UyumServisi uyum,
+    BildirimServisi bildirim,
     OturumYoneticisi oturum,
     TimeProvider saat)
 {
@@ -66,6 +67,9 @@ public sealed class EslesmeServisi(
             Durum = EslesmeDurumu.Beklemede,
             OlusturmaTarihi = saat.GetUtcNow().UtcDateTime,
         });
+
+        // Tetikleyici: istek kaydedildikten sonra aliciya bildirim.
+        bildirim.Olustur(aliciId, BildirimTuru.EslesmeIstegi, $"{oturum.AdSoyad} size eşleşme isteği gönderdi.");
     }
 
     // Yalnizca istegin alicisi yanitlayabilir.
@@ -80,6 +84,11 @@ public sealed class EslesmeServisi(
 
         eslesme.Durum = kabul ? EslesmeDurumu.Kabul : EslesmeDurumu.Red;
         eslesmeler.Guncelle(eslesme);
+
+        // Tetikleyici: yalnizca kabulde gonderene bildirim gider. Ret bilincli olarak bildirilmez;
+        // gonderen durumu Eslesmelerim sayfasinda gorur.
+        if (kabul)
+            bildirim.Olustur(eslesme.GonderenId, BildirimTuru.IstekKabul, $"{oturum.AdSoyad} eşleşme isteğinizi kabul etti.");
     }
 
     // Yalnizca gonderen, henuz yanitlanmamis istegi geri cekebilir.

@@ -33,6 +33,14 @@ public static class VeritabaniHazirlayici
         db.Database.Migrate();
         VeriTohumlayici.SorulariTohumla(db);
 
+        // Kuyruk bellekte tutulur; sunucu kapanirken gonderilmeyi bekleyen bildirimler basarisiz sayilir.
+        foreach (var b in db.Bildirimler.Where(b => b.HariciDurum == HariciGonderimDurumu.Bekliyor).ToList())
+        {
+            b.HariciDurum = HariciGonderimDurumu.Basarisiz;
+            b.HariciHata = "Sunucu yeniden başladığı için gönderilemedi.";
+        }
+        db.SaveChanges();
+
         if (ayar.GetValue<bool>("Tohum:DemoVerisi"))
         {
             // Gelistirmede demo hesaplar Demo1234 ile girilebilir. Yayinda ornek ogrenciler listede gorunur

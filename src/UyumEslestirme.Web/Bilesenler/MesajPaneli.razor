@@ -1,0 +1,45 @@
+@inherits SayfaTabani
+@* Eslesilmis kisiyle mesajlasma. Mesaj gonderilince karsi tarafa bildirim olusur (Hafta 9). *@
+
+<div class="mesaj-paneli">
+    <div class="mesajlar">
+        @foreach (var m in _mesajlar)
+        {
+            <div class="mesaj @(m.Benim ? "benim" : "onun")">
+                <span>@m.Icerik</span>
+                <small>@Arayuz.Tarih(m.Tarih)</small>
+            </div>
+        }
+        @if (_mesajlar.Count == 0)
+        {
+            <p class="soluk kucuk">Henüz mesaj yok. İlk mesajı sen gönder.</p>
+        }
+    </div>
+    <form class="mesaj-yaz" @onsubmit="Gonder">
+        <input @bind="_yeni" @bind:event="oninput" maxlength="@MesajServisi.AzamiUzunluk" placeholder="@($"{KisiAdi} kişisine mesaj yaz")" aria-label="Mesaj" />
+        <button type="submit" class="birincil" disabled="@(Mesgul || string.IsNullOrWhiteSpace(_yeni))">Gönder</button>
+        <button type="button" class="ikincil" disabled="@Mesgul" @onclick="Yenile">Yenile</button>
+    </form>
+    <Uyari Hata="@Hata" />
+</div>
+
+@code {
+    [Parameter, EditorRequired] public int KisiId { get; set; }
+    [Parameter] public string KisiAdi { get; set; } = "";
+
+    private List<MesajOzeti> _mesajlar = [];
+    private string _yeni = "";
+
+    protected override Task OnParametersSetAsync() => Dene(Yukle);
+
+    private async Task Yukle() => _mesajlar = await U.Konusma(KisiId);
+
+    private Task Yenile() => Dene(Yukle);
+
+    private async Task Gonder()
+    {
+        var icerik = _yeni;
+        if (await Dene(async () => { await U.MesajGonder(KisiId, icerik); await Yukle(); }))
+            _yeni = "";
+    }
+}

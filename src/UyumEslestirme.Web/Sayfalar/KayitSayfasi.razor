@@ -12,7 +12,7 @@
 
     <Uyari Hata="@Hata" />
 
-    <button type="submit" class="birincil genis" disabled="@_bekliyor">@(_bekliyor ? "Kaydediliyor…" : "Kayıt ol")</button>
+    <button type="submit" class="birincil genis" disabled="@Mesgul">@(Mesgul ? "Kaydediliyor…" : "Kayıt ol")</button>
 </form>
 
 <p class="alt-baglanti"><a href="" @onclick="Vazgec" @onclick:preventDefault>← Girişe dön</a></p>
@@ -25,17 +25,14 @@
     private string _eposta = "";
     private string _parola = "";
     private string _parolaTekrar = "";
-    private bool _bekliyor;
 
     private async Task Kaydol()
     {
-        _bekliyor = true;
-        Hata = null;
-        StateHasChanged();
-        await Task.Delay(20);
-
-        var basarili = Dene(() => S.Kimlik.KayitOl(_adSoyad, _eposta, _parola, _parolaTekrar));
-        _bekliyor = false;
+        var basarili = await Dene(async () =>
+        {
+            await Task.Yield();
+            await U.KayitOl(_adSoyad, _eposta, _parola, _parolaTekrar);
+        });
         if (basarili)
             await Tamamlandi.InvokeAsync();
     }

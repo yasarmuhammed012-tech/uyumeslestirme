@@ -88,6 +88,58 @@ public class UyumSkoruDeposu(UygulamaDbContext db) : Depo<UyumSkoru>(db)
     private static (int, int) Sirala(int a, int b) => a < b ? (a, b) : (b, a);
 }
 
+public class BildirimDeposu(UygulamaDbContext db) : Depo<Bildirim>(db)
+{
+    public List<Bildirim> KullanicininBildirimleri(int kullaniciId, int adet) =>
+        Db.Bildirimler.AsNoTracking()
+            .Where(b => b.KullaniciId == kullaniciId)
+            .OrderByDescending(b => b.OlusturmaTarihi).ThenByDescending(b => b.Id)
+            .Take(adet)
+            .ToList();
+
+    public int OkunmamisSayisi(int kullaniciId) =>
+        Db.Bildirimler.Count(b => b.KullaniciId == kullaniciId && !b.Okundu);
+
+    public void TumunuOkundu(int kullaniciId)
+    {
+        foreach (var b in Db.Bildirimler.Where(b => b.KullaniciId == kullaniciId && !b.Okundu).ToList())
+            b.Okundu = true;
+        Db.SaveChanges();
+    }
+
+    public BildirimTercihi? Tercih(int kullaniciId) => Db.BildirimTercihleri.Find(kullaniciId);
+
+    public void TercihKaydet(BildirimTercihi tercih)
+    {
+        if (Db.Entry(tercih).State == EntityState.Detached)
+            Db.BildirimTercihleri.Add(tercih);
+        Db.SaveChanges();
+    }
+}
+
+public class MesajDeposu(UygulamaDbContext db) : Depo<Mesaj>(db)
+{
+    // Iki kisi arasindaki son mesajlar, eskiden yeniye.
+    public List<Mesaj> Arasinda(int a, int b, int adet) =>
+        Db.Mesajlar.AsNoTracking()
+            .Where(m => (m.GonderenId == a && m.AliciId == b) || (m.GonderenId == b && m.AliciId == a))
+            .OrderByDescending(m => m.GonderimTarihi).ThenByDescending(m => m.Id)
+            .Take(adet)
+            .AsEnumerable()
+            .Reverse()
+            .ToList();
+
+    public int GonderilenSayisi(int gonderenId, DateTime baslangic) =>
+        Db.Mesajlar.Count(m => m.GonderenId == gonderenId && m.GonderimTarihi > baslangic);
+
+    public void OkunduIsaretle(int aliciId, int gonderenId)
+    {
+        foreach (var m in Db.Mesajlar.Where(m => m.AliciId == aliciId && m.GonderenId == gonderenId && !m.Okundu).ToList())
+            m.Okundu = true;
+        Db.SaveChanges();
+    }
+}
+
 public class IlanDeposu(UygulamaDbContext db) : Depo<Ilan>(db)
 {
     public List<Ilan> AktifIlanlar(string sehir) =>

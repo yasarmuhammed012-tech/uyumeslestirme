@@ -37,5 +37,5 @@
         k.AdSoyad.Contains(_arama, StringComparison.CurrentCultureIgnoreCase)
         || k.Eposta.Contains(_arama, StringComparison.OrdinalIgnoreCase));
 
-    protected override void OnInitialized() => Dene(() => _kullanicilar = S.Yonetim.KullanicilariListele());
+    protected override Task OnInitializedAsync() => Dene(async () => _kullanicilar = await U.Kullanicilar());
 }

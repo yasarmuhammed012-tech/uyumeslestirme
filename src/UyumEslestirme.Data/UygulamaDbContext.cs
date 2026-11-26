@@ -14,6 +14,7 @@ public class UygulamaDbContext(DbContextOptions<UygulamaDbContext> options) : Db
     public DbSet<Ilan> Ilanlar => Set<Ilan>();
     public DbSet<Mesaj> Mesajlar => Set<Mesaj>();
     public DbSet<Bildirim> Bildirimler => Set<Bildirim>();
+    public DbSet<BildirimTercihi> BildirimTercihleri => Set<BildirimTercihi>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -103,8 +104,18 @@ public class UygulamaDbContext(DbContextOptions<UygulamaDbContext> options) : Db
         b.Entity<Bildirim>(e =>
         {
             e.Property(x => x.Metin).HasMaxLength(300).IsRequired();
+            e.Property(x => x.HariciHata).HasMaxLength(200);
             e.HasIndex(x => new { x.KullaniciId, x.Okundu });
             e.HasOne(x => x.Kullanici).WithMany().HasForeignKey(x => x.KullaniciId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<BildirimTercihi>(e =>
+        {
+            e.HasKey(x => x.KullaniciId);
+            e.Property(x => x.TelefonKonusu).HasMaxLength(64);
+            e.HasOne(x => x.Kullanici).WithOne()
+                .HasForeignKey<BildirimTercihi>(x => x.KullaniciId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

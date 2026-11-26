@@ -62,13 +62,13 @@
 
     private IEnumerable<AdayOzeti> Gorunenler => _sehir == "" ? _adaylar : _adaylar.Where(a => a.Sehir == _sehir);
 
-    protected override void OnInitialized() => Dene(Yukle);
+    protected override Task OnInitializedAsync() => Dene(Yukle);
 
-    private void Yukle() => _adaylar = S.Adaylar.Adaylar();
+    private async Task Yukle() => _adaylar = await U.Adaylar();
 
-    private void IstekGonder(AdayOzeti aday)
+    private async Task IstekGonder(AdayOzeti aday)
     {
-        if (Dene(() => { S.Eslesme.IstekGonder(aday.KullaniciId); Yukle(); }))
+        if (await Dene(async () => { await U.IstekGonder(aday.KullaniciId); await Yukle(); }))
             Bilgi = $"{aday.AdSoyad} kişisine istek gönderildi.";
     }
 }

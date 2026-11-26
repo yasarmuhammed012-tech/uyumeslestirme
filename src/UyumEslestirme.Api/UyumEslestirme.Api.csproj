@@ -7,11 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Anthropic" Version="13.14.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.14" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\UyumEslestirme.Business\UyumEslestirme.Business.csproj" />
+    <ProjectReference Include="..\UyumEslestirme.Web\UyumEslestirme.Web.csproj" />
   </ItemGroup>
 
 </Project>

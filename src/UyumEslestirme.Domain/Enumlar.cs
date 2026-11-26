@@ -21,3 +21,19 @@ public enum EslesmeDurumu
     Kabul = 1,
     Red = 2,
 }
+
+public enum BildirimTuru
+{
+    EslesmeIstegi = 0,
+    IstekKabul = 1,
+    YeniMesaj = 2,
+    Deneme = 3,
+}
+
+public enum HariciGonderimDurumu
+{
+    Kapali = 0,      // tercih kapali veya konu tanimli degil
+    Bekliyor = 1,    // kuyrukta
+    Gonderildi = 2,
+    Basarisiz = 3,
+}

@@ -1,0 +1,123 @@
+@inherits SayfaTabani
+
+<SayfaBasligi Baslik="Bildirimler" Aciklama="Eşleşme istekleri, kabul edilen istekler ve yeni mesajlar burada görünür. İstersen telefonuna da gönderilir." />
+
+<div class="izgara">
+    <section class="kart">
+        <div class="kart-ust">
+            <h3>Son bildirimler</h3>
+            <span>
+                <button class="ikincil" disabled="@Mesgul" @onclick="Yenile">Yenile</button>
+                <button class="ikincil" disabled="@(Mesgul || _bildirimler.All(b => b.Okundu))" @onclick="TumunuOkundu">Tümünü okundu yap</button>
+            </span>
+        </div>
+        @foreach (var b in _bildirimler)
+        {
+            <div class="bildirim @(b.Okundu ? null : "yeni")">
+                <span class="bildirim-ikon">@Ikon(b.Tur)</span>
+                <div>
+                    <p>@b.Metin</p>
+                    <small class="soluk">
+                        @Arayuz.Tarih(b.Tarih)
+                        @if (b.HariciDurum != HariciGonderimDurumu.Kapali)
+                        {
+                            <span class="etiket @HariciSinif(b.HariciDurum)" title="@b.HariciHata">Telefon: @HariciAd(b.HariciDurum)</span>
+                        }
+                    </small>
+                    @if (b.HariciDurum == HariciGonderimDurumu.Basarisiz && b.HariciHata is not null)
+                    {
+                        <small class="hata-metni">@b.HariciHata</small>
+                    }
+                </div>
+            </div>
+        }
+        @if (_bildirimler.Count == 0)
+        {
+            <p class="soluk">Henüz bildirimin yok.</p>
+        }
+    </section>
+
+    <section class="kart">
+        <h3>Telefon bildirimi</h3>
+        <p class="soluk kucuk">
+            Telefonuna <b>ntfy</b> uygulamasını kur, aşağıdaki konu adına abone ol. Konu adı bir parola gibidir:
+            bilen herkes bildirimleri görebilir, bu yüzden en az 12 karakter, tahmin edilmesi zor olmalı.
+            Telefona giden metin genel tutulur; adın, e-postan veya mesaj içeriği gönderilmez.
+        </p>
+        <label>Konu adı <input @bind="_konu" placeholder="ornek-uyum-7f3k29xq" maxlength="64" /></label>
+        <button type="button" class="ikincil kucuk-dugme" @onclick="KonuUret">Rastgele konu üret</button>
+        <label class="secenek"><input type="checkbox" @bind="_eslesme" /> Eşleşme isteği ve kabulde bildir</label>
+        <label class="secenek"><input type="checkbox" @bind="_mesaj" /> Yeni mesajda bildir</label>
+        @if (!U.GercekVeritabani)
+        {
+            <p class="soluk kucuk">Web demosunda telefona gönderim yapılmaz; tercihler yine kaydedilir.</p>
+        }
+        <Uyari Hata="@Hata" Bilgi="@Bilgi" />
+        <div class="eylemler">
+            <button class="birincil" disabled="@Mesgul" @onclick="Kaydet">Kaydet</button>
+            <button class="ikincil" disabled="@Mesgul" @onclick="Deneme">Deneme bildirimi gönder</button>
+        </div>
+    </section>
+</div>
+
+@code {
+    private List<BildirimOzeti> _bildirimler = [];
+    private string? _konu;
+    private bool _eslesme = true;
+    private bool _mesaj = true;
+
+    protected override Task OnInitializedAsync() => Dene(async () =>
+    {
+        var t = await U.BildirimTercihleri();
+        (_eslesme, _mesaj, _konu) = (t.EslesmeBildirimi, t.MesajBildirimi, t.TelefonKonusu);
+        await Yukle();
+    });
+
+    private async Task Yukle()
+    {
+        _bildirimler = await U.Bildirimler();
+        await Kabuk.BildirimSayisiniYenile();
+    }
+
+    private Task Yenile() => Dene(Yukle);
+
+    private Task TumunuOkundu() => Dene(async () => { await U.TumunuOkundu(); await Yukle(); });
+
+    private void KonuUret() =>
+        _konu = "uyum-" + Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(8)).ToLowerInvariant();
+
+    private async Task Kaydet()
+    {
+        if (await Dene(() => U.BildirimTercihleriKaydet(new BildirimTercihleri(_eslesme, _mesaj, _konu))))
+            Bilgi = "✓ Bildirim tercihleri kaydedildi.";
+    }
+
+    private async Task Deneme()
+    {
+        if (await Dene(async () => { await U.DenemeBildirimi(); await Task.Delay(1500); await Yukle(); }))
+            Bilgi = "Deneme bildirimi kuyruğa alındı. Sonucu listede \"Telefon\" etiketinde görebilirsin.";
+    }
+
+    private static string Ikon(BildirimTuru t) => t switch
+    {
+        BildirimTuru.EslesmeIstegi => "✉",
+        BildirimTuru.IstekKabul => "✓",
+        BildirimTuru.YeniMesaj => "💬",
+        _ => "🔔",
+    };
+
+    private static string HariciAd(HariciGonderimDurumu d) => d switch
+    {
+        HariciGonderimDurumu.Bekliyor => "gönderiliyor",
+        HariciGonderimDurumu.Gonderildi => "gönderildi",
+        HariciGonderimDurumu.Basarisiz => "gönderilemedi",
+        _ => "kapalı",
+    };
+
+    private static string HariciSinif(HariciGonderimDurumu d) => d switch
+    {
+        HariciGonderimDurumu.Gonderildi => "iyi",
+        HariciGonderimDurumu.Basarisiz => "fark",
+        _ => "notr",
+    };
+}

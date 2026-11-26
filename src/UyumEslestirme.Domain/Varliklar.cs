@@ -108,9 +108,27 @@ public class Bildirim
 {
     public int Id { get; set; }
     public int KullaniciId { get; set; }
+    public BildirimTuru Tur { get; set; }
     public string Metin { get; set; } = "";
     public bool Okundu { get; set; }
     public DateTime OlusturmaTarihi { get; set; }
+
+    // Uygulama ici bildirim her zaman yazilir; telefona (harici API) gonderim ayrica izlenir.
+    public HariciGonderimDurumu HariciDurum { get; set; } = HariciGonderimDurumu.Kapali;
+    public string? HariciHata { get; set; }
+
+    public Kullanici? Kullanici { get; set; }
+}
+
+// Kullanicinin hangi olaylarda telefonuna bildirim almak istedigi.
+public class BildirimTercihi
+{
+    public int KullaniciId { get; set; }
+    public bool EslesmeBildirimi { get; set; } = true;
+    public bool MesajBildirimi { get; set; } = true;
+
+    // ntfy konu adi: telefondaki ntfy uygulamasinda abone olunan kanal. Bos ise harici gonderim yapilmaz.
+    public string? TelefonKonusu { get; set; }
 
     public Kullanici? Kullanici { get; set; }
 }

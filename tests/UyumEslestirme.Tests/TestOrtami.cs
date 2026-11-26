@@ -17,6 +17,12 @@ public sealed class TestOrtami : IDisposable
     public ProfilServisi Profil { get; }
     public AdayServisi Adaylar { get; }
     public EslesmeServisi Eslesme { get; }
+    public SahteKuyruk Kuyruk { get; } = new();
+    public BildirimServisi Bildirim { get; }
+    public MesajServisi Mesaj { get; }
+    public SahteYapayZeka YapayZeka { get; } = new();
+    public OneriServisi Oneri { get; }
+    public OneriServisi YapayZekasizOneri { get; }
 
     public UygulamaDbContext Db => _t.Db;
 
@@ -30,7 +36,11 @@ public sealed class TestOrtami : IDisposable
         var eslesmeler = new EslesmeDeposu(Db);
         var uyum = new UyumServisi(AnketDeposu, new UyumSkoruDeposu(Db), Saat);
         Adaylar = new AdayServisi(Kullanicilar, eslesmeler, uyum, Oturum, Saat);
-        Eslesme = new EslesmeServisi(eslesmeler, Kullanicilar, uyum, Oturum, Saat);
+        Bildirim = new BildirimServisi(new BildirimDeposu(Db), Oturum, Saat, Kuyruk);
+        Eslesme = new EslesmeServisi(eslesmeler, Kullanicilar, uyum, Bildirim, Oturum, Saat);
+        Mesaj = new MesajServisi(new MesajDeposu(Db), eslesmeler, Bildirim, Oturum, Saat);
+        Oneri = new OneriServisi(Adaylar, uyum, Oturum, YapayZeka);
+        YapayZekasizOneri = new OneriServisi(Adaylar, uyum, Oturum, null);
         VeriTohumlayici.SorulariTohumla(Db);
     }
 

@@ -77,6 +77,13 @@ namespace UyumEslestirme.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("HariciDurum")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("HariciHata")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("KullaniciId")
                         .HasColumnType("INTEGER");
 
@@ -91,11 +98,34 @@ namespace UyumEslestirme.Data.Migrations
                     b.Property<DateTime>("OlusturmaTarihi")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Tur")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("KullaniciId", "Okundu");
 
                     b.ToTable("Bildirimler");
+                });
+
+            modelBuilder.Entity("UyumEslestirme.Domain.BildirimTercihi", b =>
+                {
+                    b.Property<int>("KullaniciId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("EslesmeBildirimi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("MesajBildirimi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TelefonKonusu")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("KullaniciId");
+
+                    b.ToTable("BildirimTercihleri");
                 });
 
             modelBuilder.Entity("UyumEslestirme.Domain.Eslesme", b =>
@@ -335,6 +365,17 @@ namespace UyumEslestirme.Data.Migrations
                     b.HasOne("UyumEslestirme.Domain.Kullanici", "Kullanici")
                         .WithMany()
                         .HasForeignKey("KullaniciId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kullanici");
+                });
+
+            modelBuilder.Entity("UyumEslestirme.Domain.BildirimTercihi", b =>
+                {
+                    b.HasOne("UyumEslestirme.Domain.Kullanici", "Kullanici")
+                        .WithOne()
+                        .HasForeignKey("UyumEslestirme.Domain.BildirimTercihi", "KullaniciId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
